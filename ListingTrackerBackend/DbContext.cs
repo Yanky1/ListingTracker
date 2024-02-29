@@ -44,9 +44,11 @@ namespace ListingTracker
                 .HasKey(sc => new { sc.AcceptedPersonId, sc.PersonId }); // composite key
 
             modelBuilder.Entity<AcceptedPersonWithMatchingRecord>()
-                .HasOne(sc => sc.AcceptedPerson)
-                .WithMany(s => s.AcceptedPersonWithMatchingRecords)
-                .HasForeignKey(sc => sc.AcceptedPersonId);
+                .HasOne(ap => ap.AcceptedPerson)
+                .WithMany()
+                .HasForeignKey(ap => ap.AcceptedPersonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             modelBuilder.Entity<AcceptedPersonWithMatchingRecord>()
                 .HasOne(sc => sc.Person)

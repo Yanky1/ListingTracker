@@ -3,6 +3,7 @@
     public class AcceptedPerson
     {
         public Guid Id { get; set; }
+        public Guid PersonId { get; set; }
         // first name
         public string FirstName { get; set; }
         // last name

@@ -59,9 +59,9 @@ export default {
     category: {
       immediate: true,
       handler(newVal: CategoryType | null) {
-        this.categoryName = newVal?.name || ""
+        this.categoryName = newVal?.categoryName || ""
 
-        if (newVal?.name) {
+        if (newVal?.categoryName) {
           this.buttonTitle = "Update category"
           this.title = "Update new category"
         } else {

@@ -1,6 +1,7 @@
 export interface CategoryType {
   id: string
   categoryName: string
+  level: number
 }
 
 export interface FileType {

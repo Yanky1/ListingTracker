@@ -154,6 +154,10 @@ export default {
       }
     },
     handleClick(row_id: string) {
+          const radioButtons = document.querySelectorAll('input[type="radio"]');
+      radioButtons.forEach((radio: any) => {
+        radio.checked = false;
+      });
       if (row_id === this.expandedId) {
         this.expandedId = null
       } else {

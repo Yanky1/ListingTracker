@@ -32,19 +32,33 @@ namespace ListingTracker.Controllers
         [HttpPost("/addCategory")]
         public async Task<IActionResult> AddCategory(CategoryType categoryType)
         {
-            var category=new Category()
+            try
             {
-                IsDeleted= false,
-                CategoryName=categoryType.CategoryName,
-                Id=categoryType.Id
-            };
-             await _context.Categories.AddAsync(category);
-             _context.SaveChanges();
-            return Ok(new
+                var maxCategoryLevel = await _context.Categories.MaxAsync(c => (int?)c.CategoryLevel);
+
+                int nextCategoryLevel = maxCategoryLevel.HasValue ? maxCategoryLevel.Value + 1 : 1;
+
+                var category = new Category()
+                {
+                    IsDeleted = false,
+                    CategoryName = categoryType.CategoryName,
+                    Id = categoryType.Id,
+                    CategoryLevel = nextCategoryLevel
+                };
+
+                await _context.Categories.AddAsync(category);
+                _context.SaveChanges();
+                return Ok(new
+                {
+                    IsSuccessful = true,
+                    Data = category
+                });
+            }
+            catch (Exception ex)
             {
-                IsSuccessful = true,
-                Data = category
-            });
+                return NoContent();
+            }
+           
         }
         [HttpPut("/updateCategory")]
         public async Task<IActionResult> UpdateCategory(CategoryType category)

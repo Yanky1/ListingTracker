@@ -11,8 +11,10 @@
         <td
           :style="`width: ${cellWidths[headCell.field]}px`"
           v-for="(headCell, index) of headCells"
+        
         >
           <div class="capitalize">
+            <!-- {{headCell.field}} -->
             <template v-if="headCell.field === 'source'">
               <template v-if="typeof row[headCell.field] === 'string'">
                 {{ row[headCell.field] }}
@@ -23,26 +25,16 @@
                 class="flex gap-2 items-center cursor-pointer"
                 :title="row[headCell.field].value"
               >
-                <Radio :id="`${row.id}-${index}-address`" />
-                <Icon
-                  :name="
-                    row[headCell.field].status === 0 ? 'unverified' : 'verified'
-                  "
-                  :class="
-                    row[headCell.field].status === 0
-                      ? 'text-red'
-                      : 'text-primary'
-                  "
-                />
+                <Radio :id="`${row.id}-${index}`"  :name="`${row.number}${headCell.field}`" class="uncheckRadio" @click="handleRadiodata(row.id,row.acid,headCell.field,row[headCell.field])" />
                 <label
-                  :for="`${row.id}-${index}-address`"
+                  :for="`${row.id}-${index}`"
                   class="cursor-pointer line-clamp-2"
-                  >{{ row[headCell.field].value }}</label
+                  >{{ row[headCell.field] }}</label
                 >
               </span>
             </template>
             <template v-else-if="typeof row[headCell.field] === 'string'">
-              <Radio :id="`${row.id}-${index}`" :label="row[headCell.field]" />
+              <Radio :id="`${row.id}-${index}`" :label="row[headCell.field]" :name="`${row.number}${headCell.field}`" class="uncheckRadio" @click="handleRadiodata(row.id,row.acid,headCell.field,row[headCell.field])"/>
             </template>
           </div>
         </td>
@@ -56,7 +48,7 @@
 
   <div class="flex">
     <div class="flex gap-2 py-4 px-4">
-      <Button color="white">
+      <Button color="white" @click="handleRevert" >
         <Icon name="undo" class="min-w-[20px]" />Revert Changes</Button
       >
       <Button
@@ -96,6 +88,7 @@ import ReplaceConfirmModal from "../modal/confirm-modal.vue"
 import ConfirmSuccessModal from "../modal/confirmation-success-modal.vue"
 import TableActions from "../table/table-actions/table-actions.vue"
 
+
 export default {
   props: {
     records: { type: Object as PropType<RecordType[]>, required: true },
@@ -117,6 +110,7 @@ export default {
       showReplaceConfirmModal: false,
       showSuccessModal: false,
       successMessage: "",
+      sourceTracer:[] as any[],
     }
   },
   methods: {
@@ -138,6 +132,21 @@ export default {
       this.successMessage = `<span class="font-semibold">Information has been updated.`
       this.showSuccessModal = true
     },
+    handleRevert(){
+      const radioButtons = document.querySelectorAll('input[type="radio"]');
+      radioButtons.forEach((radio: any) => {
+        radio.checked = false;
+      });
+    },
+    handleRadiodata(idR:string,personIdR:string,fildNameR:string,fieldvalueR:string){
+      this.sourceTracer.push({
+        acceptedPersonId: idR,
+        personId: personIdR,
+        fieldName: fildNameR,
+        fieldValue: fieldvalueR
+    });
+      console.log(this.sourceTracer);
+    }
   },
 }
 </script>

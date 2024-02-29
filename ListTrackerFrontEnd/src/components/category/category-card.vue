@@ -12,9 +12,11 @@
     <div
       class="flex gap-3 bg-[#F3F6FF] border-t border-neutral-500 items-center justify-between px-2 h-[60px]"
     >
-      <span :title="name" class="text-md font-semibold line-clamp-2">{{
-        name
+      &nbsp;<span :title="name" class="text-md font-semibold line-clamp-2">{{
+      ' '+  name
       }}</span>
+      <!-- Display the level field -->
+      <span :title="'Level ' + level" class="text-md font-semibold">{{ 'Level: ' + level }}</span>
       <div class="flex gap-4 items-center">
         <span title="edit" @click="handleEdit($event, id)"
           ><Icon name="pencil" class="text-black cursor-pointer"
@@ -26,6 +28,7 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import Icon from "../icons/base-icon.vue"
 
@@ -36,6 +39,7 @@ export default {
   $emit: ["edit", "remove"],
   props: {
     name: String,
+    level:Number,
     id: { type: String, required: true },
   },
   methods: {

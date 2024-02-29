@@ -30,6 +30,7 @@
           v-for="(category, index) of categories"
           :name="category.categoryName"
           :id="category.id"
+          :level="category.level"
           @click="handleCardClick(category.id)"
           @edit="(id) => handleEdit(id, index)"
           @remove="(id) => handleRemove(id)"
@@ -99,9 +100,10 @@ export default {
         // Assuming categoriesData is an array of objects from the response
 
         // Update the categories array with the response data
-        this.categories = categoriesData.map((category: CategoryType) => ({
+        this.categories = categoriesData.map((category: any) => ({
           id: category.id.toString(), // Ensure id is a string
-          categoryName: category.categoryName
+          categoryName: category.categoryName,
+          level:category.categoryLevel
         }));
       } catch (error) {
         console.error("Error fetching category data:", error);
@@ -121,7 +123,7 @@ export default {
         var categoryResult=response.data.data;
         this.categories = this.categories.map((ca) => {
           if (ca.id === category.id) {
-            return { ...ca, categoryName: category.name }
+            return { ...ca, categoryName: category.name,level:category.level }
           } else {
             return ca
           }
@@ -135,6 +137,7 @@ export default {
         this.categories.push({
           id: categoryResult.id,
           categoryName: categoryResult.categoryName,
+          level:categoryResult.categoryLevel
         })
       }
       
@@ -148,6 +151,7 @@ export default {
       }
     },
     handleEdit(id: string, index: number) {
+      debugger;
       this.showAddModal = true
       this.category = this.categories[index]
       console.log("handleEdit", id)

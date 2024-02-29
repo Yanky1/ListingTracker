@@ -52,7 +52,6 @@
     </div>
   </Layout>
 </template>
-
 <script lang="ts">
 import Header from "../../components/header/header.vue"
 import Layout from "../../components/layout/dash-layout/dash-layout.vue"
@@ -64,8 +63,9 @@ import Dropdown, { ItemType } from "../../components/dropdown/dropdown.vue"
 import Button from "../../components/button/button.vue"
 import Icon from "../../components/icons/base-icon.vue"
 import SearchInput from "../../components/input/search-input.vue"
-import { v4 as uuidv4 } from "uuid"
+// import { v4 as uuidv4 } from "uuid"
 import { RecordType } from "../../types/record"
+import { getPersonList } from "../../services/dashboardService"
 
 interface TableDataType extends RecordType {
   children: RecordType[]
@@ -97,123 +97,78 @@ export default {
   data(): DataType {
     return {
       headCells: [
-        {
-          field: "number",
-          name: "SN",
-        },
-        {
-          field: "first_name",
-          name: "First name",
-        },
-        {
-          field: "last_name",
-          name: "Last name",
-        },
-        {
-          field: "phone",
-          name: "Phone Number",
-        },
-        {
-          field: "birthday",
-          name: "Date of Birth",
-        },
-        {
-          field: "address",
-          name: "Address",
-        },
-        {
-          field: "status",
-          name: "Status",
-        },
-      ],
-      tableData: [
-        {
-          id: uuidv4(),
-          first_name: "Aminu",
-          last_name: "Aminu",
-          phone: "0903485423",
-          birthday: "21/10/2001",
-          address: { value: "21 maple avenue", status: 0 },
-          status: "2 Conflict",
-          age: "24",
-          source: "Category 1\ Algebra student .Xls",
-          children: [
-            {
-              id: uuidv4(),
-              first_name: "Aminu",
-              last_name: "Alex",
-              address: {
-                value: "Northbridge California,(CA), 89000, USA",
-                status: 0,
-              },
-              age: "24",
-              gender: "male",
-              phone: "0903485423",
-              class: "Grade 12",
-              birthday: "21/10/2001",
-              source: "Category 1\ Algebra student .Xls",
-            },
-            {
-              id: uuidv4(),
-              first_name: "Aminu",
-              last_name: "Alex",
-              address: {
-                value: "Northbridge California,(CA), 89000, USA",
-                status: 0,
-              },
-              age: "12",
-              gender: "male",
-              class: "Grade 12",
-              source: "Category 4\ Chem. student .Xls",
-              phone: "0903485423",
-              birthday: "21/10/2001",
-            },
-          ],
-        },
-        {
-          id: uuidv4(),
-          first_name: "Aminu",
-          last_name: "Aminu",
-          phone: "0903485423",
-          birthday: "21/10/2001",
-          address: { value: "21 maple avenue", status: 0 },
-          status: "2 Conflict",
-          age: "24",
-          source: "Category 1\ Algebra student .Xls",
-          children: [
-            {
-              id: uuidv4(),
-              first_name: "Aminu",
-              last_name: "Alex",
-              address: {
-                value: "Northbridge California,(CA), 89000, USA",
-                status: 0,
-              },
-              age: "24",
-              gender: "male",
-              phone: "0903485423",
-              class: "Grade 12",
-              birthday: "21/10/2001",
-              source: "Category 1\ Algebra student .Xls",
-            },
-            {
-              id: uuidv4(),
-              first_name: "Aminu",
-              last_name: "Alex",
-              address: {
-                value: "Northbridge California,(CA), 89000, USA",
-                status: 1,
-              },
-              age: "12",
-              gender: "male",
-              class: "Grade 12",
-              source: "Category 4\ Chem. student .Xls",
-              phone: "0903485423",
-              birthday: "21/10/2001",
-            },
-          ],
-        },
-      ],
+      {
+        field: "number",
+        name: "SN",
+      },
+      {
+        field: "first_name",
+        name: "First name",
+      },
+      {
+        field: "last_name",
+        name: "Last name",
+      },
+      {
+        field: "phoneNumber",
+        name: "Phone Number",
+      },
+      {
+        field: "address",
+        name: "Address",
+      },
+      {
+        field: "city",
+        name: "City",
+      },
+      {
+        field: "state",
+        name: "State",
+      },
+      {
+        field: "zipCode",
+        name: "Zip Code",
+      },
+      {
+        field: "country",
+        name: "Country",
+      },
+      {
+        field: "status",
+        name: "Status",
+      },
+    ],
+      tableData: 
+      [
+      {
+        id: "",
+        first_name: "",
+        last_name: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+        status:"",
+        children: [
+          {
+            id: "",
+            first_name: "",
+            last_name: "",
+            email: "",
+            phoneNumber: "",
+            address: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            country: "",
+            status:""
+          },
+        ],
+      }
+      ], // Initialize empty array
       activeRecord: "",
       recordSortItems: [
         {
@@ -248,22 +203,35 @@ export default {
           name: "Last name",
         },
         {
-          field: "phone",
+          field: "phoneNumber",
           name: "Phone",
-        },
-        {
-          field: "birthday",
-          name: "birthday",
         },
         {
           field: "address",
           name: "Address",
         },
         {
-          field: "source",
-          name: "Source",
+          field: "city",
+          name: "City",
         },
+        {
+          field: "state",
+          name: "State",
+        },
+        {
+          field: "zipCode",
+          name: "Zip Code",
+        },
+        {
+          field: "country",
+          name: "Country",
+        },
+        {
+          field:"source",
+          name:"source"
+        }
       ],
+
       recordTableActions: [
         {
           type: "button",
@@ -284,10 +252,55 @@ export default {
       })
     },
   },
+  created: function () {
+    this.getInitCategoryList();
+  },
   methods: {
+    async getInitCategoryList() {
+      try {
+        const response = await getPersonList();
+        const personListData = response.data;
+        console.log(personListData); // Check if you receive the correct data
+
+        // Update the tableData with the response data
+        this.tableData = personListData.map((person: any,index:any) => ({
+          id: person.acceptedPerson.id,
+          first_name: person.acceptedPerson.firstName,
+          last_name: person.acceptedPerson.lastName,
+          email: person.acceptedPerson.email,
+          phoneNumber: person.acceptedPerson.phoneNumber,
+          address: person.acceptedPerson.address,
+          city: person.acceptedPerson.city,
+          state: person.acceptedPerson.state,
+          zipCode: person.acceptedPerson.zipCode,
+          country: person.acceptedPerson.country,
+          status:person.personList.length+' Conflict',
+          children: person.personList.map((child: any) => ({
+            id: child.id,
+            first_name: child.firstName,
+            last_name: child.lastName,
+            email: child.email,
+            phoneNumber: child.phoneNumber,
+            address: child.address,
+            city: child.city,
+            state: child.state,
+            zipCode: child.zipCode,
+            country: child.country,
+            source:child.fileName,
+            acid:person.acceptedPerson.id
+          })),
+          number:index+1
+        }));
+        console.log(this.tableData);
+      } catch (error) {
+        console.error("Error fetching person list data:", error);
+      }
+    },
     handleViewDetail(row: any) {
       this.$router.push(`/record/${row.id}/review-conflict`)
     },
   },
 }
 </script>
+
+

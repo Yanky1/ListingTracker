@@ -24,7 +24,7 @@ namespace ListingTracker.Controllers
         [HttpPost("/uploadFile")]
         public async Task<IActionResult> UploadPersonData(FileUploadViewModel model)
         {
-            var checkFiles = await _context.FileUploads.FirstOrDefaultAsync(s => s.FileName == model.FileName&&!s.IsDeleted);
+            var checkFiles = await _context.FileUploads.FirstOrDefaultAsync(s => s.FileName == model.FileName && !s.IsDeleted);
             if (checkFiles == null)
             {
                 byte[] fileBytes = Convert.FromBase64String(model.file);
@@ -88,37 +88,62 @@ namespace ListingTracker.Controllers
                             s => s.FirstName.Trim().ToLower().Contains(person.FirstName)
                             && s.LastName.Trim().ToLower().Contains(person.LastName)
                             && (s.Email.Trim().ToLower().Contains(person.Email) || s.PhoneNumber.Trim().ToLower().Contains(person.PhoneNumber))
-                            ).FirstOrDefaultAsync();
+                            )//.Include(s => s.Person).ThenInclude(s => s.PersonWithFileUploads).ThenInclude(s => s.FileUpload).ThenInclude(s => s.Category)
+                            .FirstOrDefaultAsync();
+                        var acPerson = new AcceptedPerson()
+                        {
+                            FirstName = worksheet.Cells[row, 1].Value?.ToString(),
+                            LastName = worksheet.Cells[row, 2].Value?.ToString(),
+                            Email = worksheet.Cells[row, 3].Value?.ToString(),
+                            PhoneNumber = worksheet.Cells[row, 4].Value?.ToString(),
+                            Address = worksheet.Cells[row, 5].Value?.ToString(),
+                            City = worksheet.Cells[row, 6].Value?.ToString(),
+                            State = worksheet.Cells[row, 7].Value?.ToString(),
+                            ZipCode = worksheet.Cells[row, 8].Value?.ToString(),
+                            Country = worksheet.Cells[row, 9].Value?.ToString(),
+                            IsDeleted = false,
+                            PersonId = person.Id
+                        };
+
                         if (existsInAccepted == null)
                         {
-                            var acPerson = new AcceptedPerson()
-                            {
-                                FirstName = worksheet.Cells[row, 1].Value?.ToString(),
-                                LastName = worksheet.Cells[row, 2].Value?.ToString(),
-                                Email = worksheet.Cells[row, 3].Value?.ToString(),
-                                PhoneNumber = worksheet.Cells[row, 4].Value?.ToString(),
-                                Address = worksheet.Cells[row, 5].Value?.ToString(),
-                                City = worksheet.Cells[row, 6].Value?.ToString(),
-                                State = worksheet.Cells[row, 7].Value?.ToString(),
-                                ZipCode = worksheet.Cells[row, 8].Value?.ToString(),
-                                Country = worksheet.Cells[row, 9].Value?.ToString(),
-                                IsDeleted = false
-                            };
                             await _context.AcceptedPeople.AddAsync(acPerson);
-
                             await _context.AcceptedPersonWithMatchingRecord.AddAsync(new AcceptedPersonWithMatchingRecord
                             {
                                 AcceptedPersonId = acPerson.Id,
                                 PersonId = person.Id,
+                                IsDeletedAsMatch = false
                             });
                         }
                         else
                         {
-                            await _context.AcceptedPersonWithMatchingRecord.AddAsync(new AcceptedPersonWithMatchingRecord
+                            var acceptedPersonWithMatchingRecord = await _context.PersonWithFile.Include(s=>s.FileUpload).ThenInclude(s=>s.Category).Where(s=>s.PersonId==existsInAccepted.PersonId).FirstOrDefaultAsync(); 
+                            var sourceTracing = await _context.SourceTrackings.FirstOrDefaultAsync(s => s.AcceptedPersonId == existsInAccepted.Id);
+                            var categoryData = await _context.Categories.FirstOrDefaultAsync(s => s.Id == model.CategoryId);
+                            if (sourceTracing == null
+                                && categoryData.Id != acceptedPersonWithMatchingRecord.FileUpload.CategoryId
+                                && categoryData.CategoryLevel > acceptedPersonWithMatchingRecord.FileUpload.Category.CategoryLevel)
                             {
-                                AcceptedPersonId = existsInAccepted.Id,
-                                PersonId = person.Id,
-                            });
+                                _context.Entry(existsInAccepted).State = EntityState.Detached;
+                                acPerson.Id = existsInAccepted.Id;
+                                _context.AcceptedPeople.Update(acPerson);
+                                await _context.AcceptedPersonWithMatchingRecord.AddAsync(new AcceptedPersonWithMatchingRecord
+                                {
+                                    AcceptedPersonId = acPerson.Id,
+                                    PersonId = person.Id,
+                                    IsDeletedAsMatch = false
+                                });
+                            }
+                            else
+                            {
+                                await _context.AcceptedPersonWithMatchingRecord.AddAsync(new AcceptedPersonWithMatchingRecord
+                                {
+                                    AcceptedPersonId = existsInAccepted.Id,
+                                    PersonId = person.Id,
+                                    IsDeletedAsMatch = false
+                                });
+                            }
+
                         }
                     }
                 }
@@ -127,7 +152,7 @@ namespace ListingTracker.Controllers
                 {
                     LogBy = "",
                     LogDate = DateTime.Now,
-                    LogDescription = $"Uploaded file ''Grade 6 student list .Xls'' to {category?.CategoryName}",
+                    LogDescription = $"Uploaded file ''{model.FileName}'' to {category?.CategoryName} {category.CategoryLevel}",
                     LogDetails = "",
                     LogType = "Uploaded"
                 });
@@ -148,7 +173,7 @@ namespace ListingTracker.Controllers
         [HttpPost("/getFiles")]
         public async Task<IActionResult> GetFiles(int catId)
         {
-            var getFiles = await _context.FileUploads.Where(s => s.CategoryId == catId&&!s.IsDeleted).ToListAsync();
+            var getFiles = await _context.FileUploads.Where(s => s.CategoryId == catId && !s.IsDeleted).ToListAsync();
             return Ok(new
             {
                 IsSucccessful = true,
