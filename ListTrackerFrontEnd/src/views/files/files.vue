@@ -60,7 +60,8 @@ import { v4 as uuidv4 } from "uuid"
 import { HeadCellType } from "../../components/table/table-header/table-header.vue"
 import Table, { TableActionType } from "../../components/table/table.vue"
 import dayjs from "dayjs"
-
+import {uploadFile,getFiles,deleteFile} from "../../services/fileServices"
+import { apiUrl } from "../../appConfig";
 interface DataType {
   headCells: HeadCellType[]
   searchText: string
@@ -121,19 +122,42 @@ export default {
           type: "iconButton",
           icon: "trash",
           class: "text-red",
-          callback: this.onRemove,
+          callback: (item:any) =>this.onRemove(item),
         },
         {
           type: "button",
           label: "Import file",
           icon: "download",
           class: "w-full bg-purple-500 ring-1 ring-primary-1000",
-          callback: this.onImport,
+          callback: (item:any) => this.onImport(item),
         },
       ],
     }
   },
+  created: function () {
+        this.getInitFileList();
+  },
   methods: {
+        async getInitFileList() {
+      try {
+        const params = this.$route.params;
+        const categoryId = params.category_id;
+        const response = await getFiles(categoryId[0]);
+        const filessData = response.data;
+        // Assuming categoriesData is an array of objects from the response
+
+        // Update the categories array with the response data
+        this.files = filessData.map((ft: any) => ({
+          id: ft.id.toString(), // Ensure id is a string
+          name: ft.fileDescription,
+          format:ft.fileExtension,
+          size:ft.fileSize
+
+        }));
+      } catch (error) {
+        console.error("Error fetching category data:", error);
+      }
+    },
     handleBack() {
       this.$router.push("/categories")
     },
@@ -143,20 +167,60 @@ export default {
     openModal() {
       this.showUploadModal = true
     },
-    handleFileChange(file: File) {
+    fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            if (reader.result && typeof reader.result === 'string') {
+                // Convert the ArrayBuffer to a Base64 string
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            } else {
+                reject(new Error('File reading error: FileReader result is null or not a string'));
+            }
+        };
+
+        reader.onerror = (error) => {
+            reject(error);
+        };
+
+        // Read the file as a Data URL
+        reader.readAsDataURL(file);
+    });
+  },
+   async handleFileChange(file: File) {
       const filename = file.name
       const lastDotIndex = filename.lastIndexOf(".")
       const name = filename.substring(0, lastDotIndex)
       const format = filename.substring(lastDotIndex + 1)
-
+      const params = this.$route.params;
+      const categoryId = params.category_id;
+      const base64String = await this.fileToBase64(file);
+      var fileData={
+      id: uuidv4(),
+      fileName: filename,
+      filePath: '',
+      fileExtension: format,
+      fileSize: `${(file.size / (1024 * 2)).toFixed(2)} MB`,
+      fileContentType: file.type,
+      fileDescription: name,
+      isDeleted: false,
+      dateUploaded: new Date(),
+      categoryId: +categoryId,
+      file: base64String,
+    };
+      const response = await uploadFile(fileData);
+    if (response.isSuccessful){
       this.files.push({
-        id: uuidv4(),
+        id: fileData.id,
         name,
         format,
-        size: `${(file.size / (1024 * 2)).toFixed(2)} MB`,
-        created_at: `${new Date().getTime()}`,
+        size: fileData.fileSize,
+        created_at: `${fileData.dateUploaded.getTime()}`,
         last_modified: file.lastModified,
       })
+    }
       this.closeModal()
     },
     getData() {
@@ -169,12 +233,36 @@ export default {
         }
       })
     },
-    onRemove() {
-      console.log("onRemove")
+    async onRemove(item:any) {
+      console.log(item);
+      var response=await deleteFile(item.id);
+      if(response.isSuccessful){
+        this.files = this.files.filter((file) => file.id !== item.id)
+      }
     },
-    onImport() {
-      console.log("onImport")
-    },
+    async onImport(item: any) {
+      try {
+              const response = await fetch(apiUrl+`/downloadFile?id=${item.id}`, {
+                method: 'POST'
+              });
+
+              if (!response.ok) {
+                throw new Error('Failed to download file');
+              }
+
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = item.name; 
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+            } catch (error) {
+              console.error('Error downloading file:', error);
+            }
+    }
+
   },
 }
 </script>

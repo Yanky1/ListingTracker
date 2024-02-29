@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/listingTracker.zip
+/ListingTrackerBackend/Migrations
+/ListingTrackerBackend/wwwroot/UploadedFiles/StudentsSample (2).xlsx
+/ListingTrackerBackend/wwwroot/UploadedFiles/StudentsSample (3).xlsx
+/ListingTrackerBackend/wwwroot/UploadedFiles/StudentsSample.xlsx

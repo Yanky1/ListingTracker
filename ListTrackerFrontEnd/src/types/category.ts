@@ -1,6 +1,6 @@
 export interface CategoryType {
   id: string
-  name: string
+  categoryName: string
 }
 
 export interface FileType {
@@ -10,4 +10,18 @@ export interface FileType {
   size: string
   created_at: string | number
   last_modified: string | number
+}
+
+export interface FileUploadViewModel {
+  id: number; 
+  fileName: string;
+  filePath: string;
+  fileExtension: string;
+  fileSize: string;
+  fileContentType: string;
+  fileDescription: string;
+  isDeleted: boolean;
+  dateUploaded: Date;
+  categoryId: number;
+  file: File;
 }

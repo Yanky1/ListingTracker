@@ -93,7 +93,7 @@ export default {
   mounted() {},
   data(): DataType {
     return {
-      categoryName: this.category?.name,
+      categoryName: this.category?.categoryName,
       value: null,
       fileName: "",
     }

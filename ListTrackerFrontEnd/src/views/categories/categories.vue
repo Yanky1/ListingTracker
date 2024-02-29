@@ -28,7 +28,7 @@
         <CategoryCard
           :key="`category-${index}`"
           v-for="(category, index) of categories"
-          :name="category.name"
+          :name="category.categoryName"
           :id="category.id"
           @click="handleCardClick(category.id)"
           @edit="(id) => handleEdit(id, index)"
@@ -59,7 +59,8 @@ import Icon from "../../components/icons/base-icon.vue"
 import CreateCategoryModal from "../../components/modal/create-category-modal.vue"
 import CategoryCard from "../../components/category/category-card.vue"
 import { CategoryType } from "../../types/category"
-import { v4 as uuidv4 } from "uuid"
+import {getCategoryList,addCategory,updateCategory,deleteCategory} from "../../services/categoryServices"
+//import { v4 as uuidv4 } from "uuid"
 
 interface DataType {
   searchText: string
@@ -87,7 +88,25 @@ export default {
       showAddModal: false,
     }
   },
+  created: function () {
+        this.getInitCategoryList();
+  },
   methods: {
+        async getInitCategoryList() {
+      try {
+        const response = await getCategoryList();
+        const categoriesData = response.data.data;
+        // Assuming categoriesData is an array of objects from the response
+
+        // Update the categories array with the response data
+        this.categories = categoriesData.map((category: CategoryType) => ({
+          id: category.id.toString(), // Ensure id is a string
+          categoryName: category.categoryName
+        }));
+      } catch (error) {
+        console.error("Error fetching category data:", error);
+      }
+    },
     handleClick() {
       this.category = null
       this.showAddModal = true
@@ -95,25 +114,38 @@ export default {
     handleClose() {
       this.showAddModal = false
     },
-    handleCreate(category: CategoryType) {
+    async handleCreate(category: any) {
       if (category?.id) {
+        var response=await updateCategory(category);
+        if(response.data.isSuccessful){
+        var categoryResult=response.data.data;
         this.categories = this.categories.map((ca) => {
           if (ca.id === category.id) {
-            return { ...ca, name: category.name }
+            return { ...ca, categoryName: category.name }
           } else {
             return ca
           }
-        })
+        })}
+       
       } else {
+       var response=await addCategory(category);
+       if(response.data.isSuccessful)
+       {
+        var categoryResult=response.data.data;
         this.categories.push({
-          id: `${uuidv4()}-${new Date().getTime()}`,
-          name: category.name,
+          id: categoryResult.id,
+          categoryName: categoryResult.categoryName,
         })
       }
+      
+    }
       this.showAddModal = false
     },
-    handleRemove(id: string) {
-      this.categories = this.categories.filter((category) => category.id !== id)
+    async handleRemove(id: string) {
+      var response=await deleteCategory(id);
+      if(response.data.isSuccessful){
+        this.categories = this.categories.filter((category) => category.id !== id)
+      }
     },
     handleEdit(id: string, index: number) {
       this.showAddModal = true

@@ -29,9 +29,13 @@
           >
             {{ row[headCell.field] }}
           </template>
-          <template v-else>
+          <template v-if="row[headCell.field]">
             {{ row[headCell.field].value }}
-          </template>
+        </template>
+          <template v-else>
+          <!-- Handle the case when row[headCell.field] is undefined -->
+        </template>
+
         </TableCell>
 
         <TableCell v-if="tableActions">
