@@ -28,5 +28,19 @@ export interface RecordType {
   zipCode: string;
   country: string;
   status: string;
+  source: string;
   records?: RecordType[];
+}
+export interface RecordTypeT {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  source:string
 }

@@ -114,6 +114,10 @@ export default {
         name: "Phone Number",
       },
       {
+        field: "email",
+        name: "Email",
+      },
+      {
         field: "address",
         name: "Address",
       },
@@ -152,6 +156,7 @@ export default {
         zipCode: "",
         country: "",
         status:"",
+        source:"",
         children: [
           {
             id: "",
@@ -164,7 +169,8 @@ export default {
             state: "",
             zipCode: "",
             country: "",
-            status:""
+            status:"",
+            source:""
           },
         ],
       }
@@ -205,6 +211,10 @@ export default {
         {
           field: "phoneNumber",
           name: "Phone",
+        },
+        {
+          field: "email",
+          name: "email",
         },
         {
           field: "address",

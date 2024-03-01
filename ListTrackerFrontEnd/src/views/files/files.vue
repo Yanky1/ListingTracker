@@ -221,6 +221,9 @@ export default {
         last_modified: file.lastModified,
       })
     }
+    else{
+      alert(response.message)
+    }
       this.closeModal()
     },
     getData() {

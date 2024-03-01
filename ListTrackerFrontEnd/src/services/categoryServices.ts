@@ -63,7 +63,5 @@ export async function getCategoryList(): Promise<any> {
     return await axios
       .request(config)
       .then((response) => response)
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch((error) => error);
   }

@@ -19,7 +19,7 @@
         {{ value }}
       </div>
       <div class="text-xs">
-        <Radio :id="`${field}-${index}`" :label="label" />
+        <Radio :id="`${field}-${index}`" :label="label" :name="field" @click="test(rows.id[index],value,field)"/>
       </div>
     </div>
   </td>
@@ -49,6 +49,14 @@ export default {
       return `This is the main <span class="text-primary font-bold">${this.field}</span>`
     },
   },
+  methods:{
+    test(row:any,value:any,field:any){
+      this.$emit('radioS',row,value,field.replace(' ','_'));
+      //console.log(row,value,field.replace(' ',''));
+    }
+  }
+
+  
 }
 </script>
 <style lang="scss"></style>

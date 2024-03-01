@@ -28,14 +28,14 @@
             <RecordSources :sources="sources" />
           </div>
           <div class="mt-[45px]">
-            <RecordCompareTable :records="records" />
+            <RecordCompareTable :records="records" @radioSelected="myRadio" @dtl3="deleteClickConfirm"/>
           </div>
         </div>
 
         <div class="flex flex-col items-center">
           <ActivityCard :activities="activities" />
           <div class="flex gap-2 mt-[50px]">
-            <Button color="white">
+            <Button color="white" @click="revertChange">
               <Icon name="undo" class="min-w-[20px]" />Revert Changes</Button
             >
             <Button
@@ -72,20 +72,22 @@ import Topbar from "../../components/top-bar/top-bar.vue"
 import Icon from "../../components/icons/base-icon.vue"
 import ProfileSection from "../../components/profile-section/profile-section.vue"
 import RecordSources from "../../components/profile-section/record-sources.vue"
-import { RecordType } from "../../types/record"
+import {  RecordTypeT } from "../../types/record"
 import ActivityCard from "../../components/activity/activity-card.vue"
 import { ActivityType } from "../../components/activity/activity-item.vue"
 import ReplaceConfirmModal from "../../components/modal/confirm-modal.vue"
 import ConfirmSuccessModal from "../../components/modal/confirmation-success-modal.vue"
 import RecordCompareTable from "../../components/conflict-compare-table/conflict-compare-table.vue"
 import { v4 as uuidv4 } from "uuid"
+import { getPersonById,updateConflict ,deleteperson} from "../../services/dashboardService"
 
 interface DataType {
-  records: RecordType[]
+  records: RecordTypeT[]
   activities: ActivityType[]
   showReplaceConfirmModal: boolean
   showSuccessModal: boolean
-  successMessage: string
+  successMessage: string,
+  sourceTracer:any[]
 }
 
 export default {
@@ -103,10 +105,11 @@ export default {
   },
   data(): DataType {
     return {
+      sourceTracer:[],
       activities: [
         {
           id: uuidv4(),
-          type: "Aminu",
+          type: "Aminu s",
           description:
             "from 'Grade 6 student list .Xls' was accepted as correct first name.",
           updatedAt: "Feb 17 2024 - 12:32:13 pm",
@@ -123,32 +126,32 @@ export default {
       showSuccessModal: false,
       successMessage: "",
       records: [
-        {
-          id: "1",
-          first_name: "Aminu",
-          last_name: "Alex",
-          address: {
-            value: "Northbridge California,(CA), 89000, USA",
-            status: 0,
-          },
-          age: "24",
-          gender: "male",
-          class: "Grade 12",
-          source: "Category 1\ Algebra student .Xls",
-        },
-        {
-          id: "1",
-          first_name: "Aminu",
-          last_name: "Alex",
-          address: {
-            value: "Northbridge California,(CA), 89000, USA",
-            status: 0,
-          },
-          age: "12",
-          gender: "male",
-          class: "Grade 12",
-          source: "Category 4\ Chem. student .Xls",
-        },
+      {
+        id: "1",
+        first_name: "",
+        last_name: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+        source:""
+      },
+     {
+        id: "2",
+        first_name: "",
+        last_name: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+        source:""
+      }
       ],
     }
   },
@@ -164,29 +167,116 @@ export default {
       return sources
     },
   },
+  created: function () {
+    this.getInitInitList();
+  },
   methods: {
+    async deleteClickConfirm(id:any){
+      var data=await deleteperson(id);
+      if(data.data.isSuccessful){
+        this.successMessage = `<span class="font-semibold">Information has been deleted.`
+      this.showSuccessModal = true;
+      this.getInitInitList();
+      }
+    },
+    myRadio(row:any,value:any,field:any){
+      var vm = this;
+      const params = this.$route.params;
+      const idS = params.record_id;
+    if (vm.sourceTracer.length === 0) {
+        vm.sourceTracer.push({
+            acceptedPersonId:  idS,
+            personId: row,
+            fieldName: field,
+            fieldValue: value
+        });
+    } else {
+        if (vm.sourceTracer[0].acceptedPersonId === idS) {
+            const existingFieldIndex = vm.sourceTracer.findIndex(s => s.fieldName === field);
+            if (existingFieldIndex !== -1) {
+                vm.sourceTracer[existingFieldIndex].fieldValue = value;
+            } else {
+                vm.sourceTracer.push({
+                  acceptedPersonId:  idS,
+                    personId: row,
+                    fieldName: field,
+                    fieldValue: value
+                });
+            }
+        } else {
+            vm.sourceTracer = [{
+              acceptedPersonId:  idS,
+              personId: row,
+                fieldName: field,
+                fieldValue: value
+            }];
+        }
+    }
+    console.log(vm.sourceTracer);
+    },
+    async getInitInitList() {
+        const params = this.$route.params;
+        const id = params.record_id;
+        const response = await getPersonById(id.toString());
+        const personListData = response.data;
+        console.log(personListData); // Check what is inside personListData
+        this.records = personListData.map((person:any) => ({
+            id: person.id=="00000000-0000-0000-0000-000000000000"?"":person.id,
+            first_name: person.firstName,
+            last_name: person.lastName,
+            email: person.email,
+            phoneNumber: person.phoneNumber,
+            address: person.address,
+            city: person.city,
+            state: person.state,
+            zipCode: person.zipCode,
+            country: person.country,
+            source:person.fileName
+        }));
+
+        console.log(this.records); // Check if you receive the correct data
+    },
     handleBack() {
       this.$router.push("/record")
     },
     openReplaceConfirmModal() {
+      
       this.showReplaceConfirmModal = true
     },
     closeReplaceConfirmModal() {
+      
       this.showReplaceConfirmModal = false
     },
     closeSuccessModal() {
       this.showSuccessModal = false
     },
-    onReplaceConfirm() {
-      console.log("handle replacing")
+    async onReplaceConfirm() {
+      if(this.sourceTracer.length>0){
+        console.log("handle replacing");
+      const response = await updateConflict(this.sourceTracer);
+      if(response.data.isSuccessful){
+      this.revertChange();
       this.showReplaceConfirmModal = false
-      this.successMessage = `<span class="font-semibold">${this.currentRecord?.first_name} ${this.currentRecord?.last_name}</span> information has been updated.`
+      this.successMessage = `<span class="font-semibold">Information has been updated.`
       this.showSuccessModal = true
+      }
+      }
+      else{
+        alert("Please select data before submitting");
+      }
+     
     },
     onClickOverwrite() {
       const record_id = this.$route.params.record_id
       this.$router.push(`/record/${record_id}/overwrite`)
     },
+    revertChange(){
+      const radioButtons = document.querySelectorAll('input[type="radio"]');
+      radioButtons.forEach((radio: any) => {
+        radio.checked = false;
+      });
+      this.sourceTracer=[];
+    }
   },
 }
 </script>

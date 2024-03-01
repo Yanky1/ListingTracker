@@ -40,7 +40,7 @@
         </td>
 
         <td v-if="tableActions.length > 0">
-          <TableActions :tableActions="tableActions" />
+          <TableActions :tableActions="tableActions" @click="handleClick(row)"/>
         </td>
       </tr>
     </tbody>
@@ -87,6 +87,7 @@ import Icon from "../icons/base-icon.vue"
 import ReplaceConfirmModal from "../modal/confirm-modal.vue"
 import ConfirmSuccessModal from "../modal/confirmation-success-modal.vue"
 import TableActions from "../table/table-actions/table-actions.vue"
+import { updateConflict,deleteperson } from "../../services/dashboardService"
 
 
 export default {
@@ -114,6 +115,13 @@ export default {
     }
   },
   methods: {
+    async handleClick(row:any){
+      var data=await deleteperson(row.id);
+      if(data.data.isSuccessful){
+        this.successMessage = `<span class="font-semibold">Information has been deleted.`
+      this.showSuccessModal = true
+      }
+    },
     handleAction(callback: Function, row: any) {
       callback(row) // Invoke the callback function with the row data
     },
@@ -124,29 +132,69 @@ export default {
       this.showReplaceConfirmModal = false
     },
     closeSuccessModal() {
+      window.location.reload();
       this.showSuccessModal = false
     },
-    onReplaceConfirm() {
-      console.log("handle replacing")
+    async onReplaceConfirm() {
+      if(this.sourceTracer.length>0){
+        console.log("handle replacing");
+      const response = await updateConflict(this.sourceTracer);
+      if(response.data.isSuccessful){
+      this.handleRevert();
       this.showReplaceConfirmModal = false
       this.successMessage = `<span class="font-semibold">Information has been updated.`
       this.showSuccessModal = true
+      }
+      }
+      else{
+        alert("Please select data before submitting");
+      }
+     
+
     },
     handleRevert(){
       const radioButtons = document.querySelectorAll('input[type="radio"]');
       radioButtons.forEach((radio: any) => {
         radio.checked = false;
       });
+      this.sourceTracer=[];
     },
-    handleRadiodata(idR:string,personIdR:string,fildNameR:string,fieldvalueR:string){
-      this.sourceTracer.push({
-        acceptedPersonId: idR,
-        personId: personIdR,
-        fieldName: fildNameR,
-        fieldValue: fieldvalueR
-    });
-      console.log(this.sourceTracer);
+    handleRadiodata(idR:any, personIdR:any, fildNameR:any, fieldvalueR:any) {
+    var vm = this;
+
+    if (vm.sourceTracer.length === 0) {
+        vm.sourceTracer.push({
+            acceptedPersonId:  personIdR,
+            personId: idR,
+            fieldName: fildNameR,
+            fieldValue: fieldvalueR
+        });
+    } else {
+        if (vm.sourceTracer[0].acceptedPersonId === personIdR) {
+            const existingFieldIndex = vm.sourceTracer.findIndex(s => s.fieldName === fildNameR);
+            if (existingFieldIndex !== -1) {
+                vm.sourceTracer[existingFieldIndex].fieldValue = fieldvalueR;
+            } else {
+                vm.sourceTracer.push({
+                  acceptedPersonId:  personIdR,
+                    personId: idR,
+                    fieldName: fildNameR,
+                    fieldValue: fieldvalueR
+                });
+            }
+        } else {
+            vm.sourceTracer = [{
+              acceptedPersonId:  personIdR,
+              personId: idR,
+                fieldName: fildNameR,
+                fieldValue: fieldvalueR
+            }];
+        }
     }
+
+    console.log(vm.sourceTracer);
+}
+
   },
 }
 </script>

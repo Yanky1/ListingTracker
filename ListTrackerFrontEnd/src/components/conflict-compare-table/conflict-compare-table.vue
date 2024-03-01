@@ -2,7 +2,7 @@
   <table class="conflict-compare-table w-full">
     <thead class="bg-[#FFE49E]">
       <TableHead :disableRemove="true"></TableHead>
-      <TableHead v-for="(record, index) of records">{{
+      <TableHead v-for="(record, index) of records" @dltClk1="dltclk2(record)">{{
         `Record #${index + 1}`
       }}</TableHead>
     </thead>
@@ -21,6 +21,7 @@
           :index="index"
           :value="getColumn(column)"
           :rows="data"
+          @radioS="hello"
         ></TBody>
       </tr>
     </tbody>
@@ -57,6 +58,18 @@ export default {
     },
   },
   methods: {
+    dltclk2(record:any){
+      this.$emit('dtl3',record.id);
+      
+    },
+    hello(row:any,value:any,field:any){
+      this.$emit('radioSelected',row,value,field);
+    },
+    handleRadio(row:any,column:any){
+      //console.log(row)
+      this.$emit('radioSelected',row,column);
+      //console.log(row);
+    },
     getColumn (column: any) {
       if (typeof column === 'string') {
         return column

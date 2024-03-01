@@ -20,113 +20,66 @@
           'flex flex-col gap-6',
         ]"
       >
+        <!-- Input field for first name -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="overwrite-first-name"
-            class="text-sm font-medium text-gray-700"
-            >First name</label
-          >
-          <Input
-            id="overwrite-first-name"
-            type="text"
-            fullWidth
-            placeholder="Enter second name"
-          />
+          <label for="overwrite-first-name" class="text-sm font-medium text-gray-700">First name</label>
+          <Input id="overwrite-first-name" placeholder="First Name" type="text" fullWidth v-model="recordData.first_name" />
         </div>
 
+        <!-- Input field for last name -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="overwrite-second-name"
-            class="text-sm font-medium text-gray-700"
-            >Second name</label
-          >
-          <Input
-            id="overwrite-second-name"
-            type="text"
-            fullWidth
-            placeholder="Enter second name"
-          />
+          <label for="overwrite-last-name" class="text-sm font-medium text-gray-700">Last name</label>
+          <Input id="overwrite-last-name" placeholder="Last Name" type="text" fullWidth v-model="recordData.last_name" />
         </div>
 
+        <!-- Input field for email -->
         <div class="flex flex-col gap-1.5">
-          <label for="gender" class="text-sm font-medium text-gray-700"
-            >Gender</label
-          >
-          <Select
-            id="gender"
-            type="text"
-            v-model="gender"
-            :items="genderItems"
-            fullWidth
-            placeholder="Select gender"
-          />
+          <label for="overwrite-email" class="text-sm font-medium text-gray-700">Email</label>
+          <Input id="overwrite-email" placeholder="Email" type="email" fullWidth v-model="recordData.email" />
         </div>
 
+        <!-- Input field for phone number -->
         <div class="flex flex-col gap-1.5">
-          <label for="overwrite-birth" class="text-sm font-medium text-gray-700"
-            >Date of birth</label
-          >
-          <Input
-            id="overwrite-birth"
-            type="date"
-            fullWidth
-            placeholder="Enter address"
-          />
+          <label for="overwrite-phone" class="text-sm font-medium text-gray-700">Phone number</label>
+          <Input id="overwrite-phone" type="text" placeholder="Phone Number" fullWidth v-model="recordData.phoneNumber" />
         </div>
 
+        <!-- Input field for address -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="overwrite-address-name"
-            class="text-sm font-medium text-gray-700"
-            >Address</label
-          >
-          <Input
-            id="overwrite-address-name"
-            type="text"
-            fullWidth
-            placeholder="Enter address"
-          />
+          <label for="overwrite-address" class="text-sm font-medium text-gray-700">Address</label>
+          <Input id="overwrite-address" type="text" placeholder="Address" fullWidth v-model="recordData.address" />
         </div>
 
+        <!-- Input field for city -->
         <div class="flex flex-col gap-1.5">
-          <label for="overwrite-phone" class="text-sm font-medium text-gray-700"
-            >Phone number</label
-          >
-          <Input
-            id="overwrite-phone"
-            type="text"
-            fullWidth
-            placeholder="Enter phone number"
-          />
+          <label for="overwrite-city" class="text-sm font-medium text-gray-700">City</label>
+          <Input id="overwrite-city" type="text" placeholder="City" fullWidth v-model="recordData.city" />
         </div>
 
+        <!-- Input field for state -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="overwrite-guardian-name"
-            class="text-sm font-medium text-gray-700"
-            >Guardian name</label
-          >
-          <Input
-            id="overwrite-guardian-name"
-            type="text"
-            fullWidth
-            placeholder="Enter guardian name"
-          />
+          <label for="overwrite-state" class="text-sm font-medium text-gray-700">State</label>
+          <Input id="overwrite-state" type="text" placeholder="State" fullWidth v-model="recordData.state" />
         </div>
 
+        <!-- Input field for zip code -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="overwrite-guardian-phone"
-            class="text-sm font-medium text-gray-700"
-            >Guardian phone</label
-          >
-          <Input
-            id="overwrite-guardian-phone"
-            type="text"
-            fullWidth
-            placeholder="Enter guardian phone"
-          />
+          <label for="overwrite-zip" class="text-sm font-medium text-gray-700">Zip Code</label>
+          <Input id="overwrite-zip" type="text" placeholder="Zip Code" fullWidth v-model="recordData.zipCode" />
         </div>
+
+        <!-- Input field for country -->
+        <div class="flex flex-col gap-1.5">
+          <label for="overwrite-country" class="text-sm font-medium text-gray-700">Country</label>
+          <Input id="overwrite-country" type="text" placeholder="Country" fullWidth v-model="recordData.country" />
+        </div>
+
+        <!-- Input field for source -->
+        <!-- <div class="flex flex-col gap-1.5">
+          <label for="overwrite-source" class="text-sm font-medium text-gray-700">Source</label>
+          <Input id="overwrite-source" type="text" placeholder="Source" fullWidthv-model="recordData.source" />
+        </div> -->
+
 
         <div class="flex gap-2 w-full mt-5">
           <Button color="white" class="w-full" @click="showRevertModal = true"
@@ -158,8 +111,13 @@
       @close="showSaveConfirmModal = false"
       @confirm="onSave"
       closeButton="Discard"
-      confirmButton="Revert changes"
+      confirmButton="Save changes"
     />
+    <!-- <ConfirmSuccessModal
+      :open="showSuccessModal"
+      :message="successMessage"
+      @close="closeSuccessModal"
+    /> -->
   </Layout>
 </template>
 
@@ -170,15 +128,16 @@ import Topbar from "../../components/top-bar/top-bar.vue"
 import Button from "../../components/button/button.vue"
 import Icon from "../../components/icons/base-icon.vue"
 import Input from "../../components/input/input.vue"
-import Dropdown, { ItemType } from "../../components/dropdown/dropdown.vue"
+import Dropdown from "../../components/dropdown/dropdown.vue"
 import Select from "../../components/select/select.vue"
 import ConfirmModal from "../../components/modal/confirm-modal.vue"
+import { RecordTypeT } from "../../types/record"
+import { getAccecptedPerson,updateAccecptedPerson } from "../../services/overrrideServiece"
 
 interface DataType {
-  genderItems: ItemType[]
-  gender: string
   showRevertModal: boolean
   showSaveConfirmModal: boolean
+  recordData:RecordTypeT
 }
 
 export default {
@@ -195,22 +154,49 @@ export default {
   },
   data(): DataType {
     return {
-      genderItems: [
-        {
-          value: "male",
-          label: "Male",
-        },
-        {
-          value: "female",
-          label: "Female",
-        },
-      ],
-      gender: "",
       showRevertModal: false,
       showSaveConfirmModal: false,
+      recordData:{
+        address:"",
+        city:"",
+        country:"",
+        email:"",
+        first_name:"",
+        last_name:"",
+        phoneNumber:"",
+        state:"",
+        source:"",
+      zipCode:"",
+      id:""
+      }
     }
   },
+  created: function () {
+    this.getInitList();
+
+  },
   methods: {
+   async getInitList(){
+      const params = this.$route.params;
+      const idS = params.record_id;
+      var dataResult=await getAccecptedPerson(idS.toString());
+      var data=dataResult.data;
+      this.recordData={
+            id: data.id,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            email: data.email,
+            phoneNumber: data.phoneNumber,
+            address: data.address,
+            city: data.city,
+            state: data.state,
+            zipCode: data.zipCode,
+            country: data.country,
+            source:"",
+
+      };
+      console.log(this.recordData);
+    },
     onBack() {
       const record_id = this.$route.params.record_id
       this.$router.push(`/record/${record_id}/review-conflict`)
@@ -218,7 +204,29 @@ export default {
     onRevertChanges() {
       console.log("onRevertChanges")
     },
-    onSave() {
+    async onSave() {
+     var res=await updateAccecptedPerson(
+     {
+      address:this.recordData.address,
+        city:this.recordData.city,
+        country:this.recordData.country,
+        email:this.recordData.email,
+        firstName:this.recordData.first_name,
+        lastName:this.recordData.last_name,
+        phoneNumber:this.recordData.phoneNumber,
+        state:this.recordData.state,
+      zipCode:this.recordData.zipCode,
+      id:this.recordData.id
+     } 
+     
+     );
+     if(res.data.isSuccessful){
+      alert("Data Saved");
+     }
+     else{
+      alert("Save Failed");
+     }
+     this.showSaveConfirmModal=false;
       console.log("onSave")
     },
   },

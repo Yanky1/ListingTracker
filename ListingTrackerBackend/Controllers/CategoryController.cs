@@ -87,10 +87,12 @@ namespace ListingTracker.Controllers
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
+            var file = await _context.FileUploads.FirstOrDefaultAsync(s=>s.CategoryId==id);
 
-            if (category == null)
+
+            if (category == null|| file!=null)
             {
-                return NotFound("Category not found");
+                return StatusCode(403, "Can not delete! The category contains children.");
             }
 
             // Soft delete by setting IsDeleted to true

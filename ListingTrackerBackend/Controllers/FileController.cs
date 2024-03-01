@@ -166,7 +166,11 @@ namespace ListingTracker.Controllers
             }
             else
             {
-                return BadRequest();
+                return Ok(new
+                {
+                    IsSuccessful=false,
+                    Message="Duplicate File Name."
+                });
             }
 
         }
@@ -202,24 +206,49 @@ namespace ListingTracker.Controllers
             // Return the file to the client
             return PhysicalFile(filePath, getFile.FileContentType, getFile.FileName);
         }
+
         [HttpDelete("/deleteFile")]
         public async Task<IActionResult> DeleteFile(Guid id)
         {
-            var getFile = await _context.FileUploads.FirstOrDefaultAsync(s => s.Id == id);
+            var getFile = await _context.FileUploads.Include(s => s.Category).FirstOrDefaultAsync(s => s.Id == id);
 
             if (getFile == null)
             {
                 return NotFound(); // Return a 404 Not Found response if the file is not found
             }
+
+            string appRootPath = _hostingEnvironment.ContentRootPath;
+            string fullPath = Path.Combine(appRootPath, "wwwroot\\UploadedFiles", getFile.FileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+            else
+            {
+                return NotFound();
+            }
+
             getFile.IsDeleted = true;
 
             _context.FileUploads.Update(getFile);
-            _context.SaveChanges();
-            return Ok(
-                new
-                {
-                    IsSuccessful = true,
-                });
+
+            await _context.ActivityLogs.AddAsync(new ActivityLog
+            {
+                LogBy = "User",
+                LogDate = DateTime.Now,
+                LogDescription = $"Deleted file '{getFile.FileName}' with category '{getFile.Category.CategoryName}'",
+                LogDetails = $"Deleted file '{getFile.FileName}' with category '{getFile.Category.CategoryName}'",
+                LogType = "File Deleted"
+            });
+
+            await _context.SaveChangesAsync(); // Use SaveChangesAsync instead of SaveChanges
+
+            return Ok(new
+            {
+                IsSuccessful = true,
+            });
         }
 
     }

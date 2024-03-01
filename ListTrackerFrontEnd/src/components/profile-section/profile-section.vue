@@ -10,12 +10,12 @@
         {{ `${record.first_name} ${record.last_name}` }}
       </div>
       <div class="text-black text-xs mt-3">
-        {{ record.address.value }}
+        {{ record.address }}
       </div>
       <div class="text-black text-xs mt-2 flex gap-1">
-        <span> Age: {{ record.age }} | </span>
+        <!-- <span> Age: {{ record.age }} | </span>
         <span> Gender: {{ record.gender }} | </span>
-        <span> Class: {{ record.class }} </span>
+        <span> Class: {{ record.class }} </span> -->
       </div>
     </div>
   </div>

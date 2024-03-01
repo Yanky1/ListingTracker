@@ -145,8 +145,12 @@ export default {
       this.showAddModal = false
     },
     async handleRemove(id: string) {
+      debugger;
       var response=await deleteCategory(id);
-      if(response.data.isSuccessful){
+      if(response.data==undefined){
+        alert(response.response.data);
+      }
+      else if(response.data.isSuccessful){
         this.categories = this.categories.filter((category) => category.id !== id)
       }
     },

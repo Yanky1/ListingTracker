@@ -58,4 +58,9 @@ namespace ListingTracker.Classes
         public string Country { get; set; }
         public bool IsDeleted { get; set; }
     }
+    public class UpdateDataModel
+    {
+        public string UpdateData { get; set; }
+    }
+
 }
