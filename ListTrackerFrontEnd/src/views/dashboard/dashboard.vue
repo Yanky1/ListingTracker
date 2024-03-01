@@ -12,12 +12,12 @@
           />
 
 
-          <!-- <Dropdown
+          <Dropdown
             :items="recordSortItems"
             label="Filter"
             icon="bars-filter"
             iconClass="min-w-5 min-h-5"
-          /> -->
+          />
 
           <div class="w-full max-w-[600px]">
             <SearchInput
@@ -256,13 +256,13 @@ export default {
   },
   computed: {
     filteredAndSortedData() {
-    let filteredData = this.tableData.filter(item => {
+      let filteredData = this.tableData.filter(item => {
+      // Implement your search filtering logic here
+      const searchField = this.activeFilter === "first_name" ? "first_name" : "last_name";
       return (
-        item.first_name.toLowerCase().includes(this.searchText.toLowerCase()) ||
-        item.last_name.toLowerCase().includes(this.searchText.toLowerCase())
+        item[searchField].toLowerCase().includes(this.searchText.toLowerCase())
       );
     });
-
     if (this.activeRecord) {
       filteredData = filteredData.sort((a:any, b) => {
         if (this.activeRecord === 'name') {

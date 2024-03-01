@@ -94,138 +94,152 @@ namespace ListingTracker.Controllers
         [HttpPost("/updateConflict")]
         public async Task<IActionResult> UpdateConflict([FromBody] UpdateDataModel updateData)
         {
-            var updateDataList = JsonConvert.DeserializeObject<List<AcceptedSourceTracking>>(updateData.UpdateData);
-            var acceptedPersonId = updateDataList.FirstOrDefault()?.AcceptedPersonId;
-            var acceptedPerson = await _qDbContext.AcceptedPeople.FirstOrDefaultAsync(s => s.Id == acceptedPersonId);
-
-            var file= await _qDbContext.People.Include(s=>s.PersonWithFileUploads).ThenInclude(s=>s.FileUpload).Where(s=>s.Id==acceptedPerson.PersonId).FirstOrDefaultAsync();
-
-            var filename=file.PersonWithFileUploads.FirstOrDefault().FileUpload.FileName;
-            foreach (var item in updateDataList)
+            try
             {
-                if (item.FieldName.ToLower() == "first_name")
-                {
-                    acceptedPerson.FirstName = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct first name.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
-                }
-                else if (item.FieldName.ToLower() == "last_name")
-                {
-                    acceptedPerson.LastName = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct last name.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
-                }
-                else if (item.FieldName.ToLower() == "email")
-                {
-                    acceptedPerson.Email = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct email.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
-                }
-                else if (item.FieldName.ToLower() == "address")
-                {
-                    acceptedPerson.Address = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct address.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
+                var updateDataList = JsonConvert.DeserializeObject<List<AcceptedSourceTracking>>(updateData.UpdateData);
+                var acceptedPersonId = updateDataList.FirstOrDefault()?.AcceptedPersonId;
+                var acceptedPerson = await _qDbContext.AcceptedPeople.Include(s => s.AcceptedPersonWithMatchingRecords).FirstOrDefaultAsync(s => s.Id == acceptedPersonId);
 
-                }
-                else if (item.FieldName.ToLower() == "phonenumber")
+                var file = await _qDbContext.People.Include(s => s.PersonWithFileUploads).ThenInclude(s => s.FileUpload).Where(s => s.Id == acceptedPerson.PersonId).FirstOrDefaultAsync();
+
+                var filename = file.PersonWithFileUploads.FirstOrDefault().FileUpload.FileName;
+                foreach (var item in updateDataList)
                 {
-                    acceptedPerson.PhoneNumber = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    if (item.FieldName.ToLower() == "first_name")
                     {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct phone no.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
+                        acceptedPerson.FirstName = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct first name.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "last_name")
+                    {
+                        acceptedPerson.LastName = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct last name.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "email")
+                    {
+                        acceptedPerson.Email = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct email.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "address")
+                    {
+                        acceptedPerson.Address = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct address.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+
+                    }
+                    else if (item.FieldName.ToLower() == "phonenumber")
+                    {
+                        acceptedPerson.PhoneNumber = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct phone no.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "city")
+                    {
+                        acceptedPerson.City = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct city.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "state")
+                    {
+                        acceptedPerson.State = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct state.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "zipcode")
+                    {
+                        acceptedPerson.ZipCode = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct zip code.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "country")
+                    {
+                        acceptedPerson.Country = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct country.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
                 }
-                else if (item.FieldName.ToLower() == "city")
+                _qDbContext.AcceptedPeople.Update(acceptedPerson);
+
+                var records = await _qDbContext.AcceptedPersonWithMatchingRecord.Where(s => s.AcceptedPersonId == acceptedPersonId).ToListAsync();
+
+
+                await _qDbContext.AddRangeAsync(updateDataList);
+                foreach (var item in records)
                 {
-                    acceptedPerson.City = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct city.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
+                    item.IsDeletedAsMatch = true;
                 }
-                else if (item.FieldName.ToLower() == "state")
+                _qDbContext.AcceptedPersonWithMatchingRecord.UpdateRange(records);
+                await _qDbContext.SaveChangesAsync();
+
+
+                // Access updateData.UpdateData here
+                return Ok(new
                 {
-                    acceptedPerson.State = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct state.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
-                }
-                else if (item.FieldName.ToLower() == "zipcode")
-                {
-                    acceptedPerson.ZipCode = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct zip code.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
-                }
-                else if (item.FieldName.ToLower() == "country")
-                {
-                    acceptedPerson.Country = item.FieldValue;
-                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-                    {
-                        LogBy = "User",
-                        LogDate = DateTime.Now,
-                        LogDescription = $"from '{filename}' was accepted as correct country.",
-                        LogDetails = acceptedPersonId.ToString(),
-                        LogType = item.FieldValue
-                    });
-                }
+                    IsSuccessful = true,
+                });
             }
-            _qDbContext.AcceptedPeople.Update(acceptedPerson);
-
-
-            await _qDbContext.AddRangeAsync(updateDataList);
-           
-            await _qDbContext.SaveChangesAsync();
-
-
-            // Access updateData.UpdateData here
-            return Ok(new
+            catch (Exception ex)
             {
-                IsSuccessful = true,
-            });
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpDelete("/deletePerson")]
@@ -260,9 +274,41 @@ namespace ListingTracker.Controllers
         {
             var personList = await _qDbContext.AcceptedPersonWithMatchingRecord
                 .Include(s => s.Person).ThenInclude(s => s.PersonWithFileUploads).ThenInclude(s => s.FileUpload).ThenInclude(s => s.Category)
-                .Where(s => s.AcceptedPersonId == id&&!s.IsDeletedAsMatch).ToListAsync();
+                .Where(s => s.AcceptedPersonId == id && !s.IsDeletedAsMatch).ToListAsync();
 
-            var data = personList.Select(p => new PersonViewData
+            var list = new List<PersonViewData>();
+            var a= _qDbContext.AcceptedPeople.First(s=>s.Id==id);
+            var accepted = await _qDbContext.People
+              .Include(s => s.PersonWithFileUploads)
+                  .ThenInclude(s => s.FileUpload)
+                      .ThenInclude(s => s.Category)
+      .FirstOrDefaultAsync(s=>s.Id== a.PersonId);
+
+            var matchingRecord = accepted.PersonWithFileUploads
+                .FirstOrDefault();
+
+            var filename = matchingRecord.FileUpload?.FileName;
+            var category = matchingRecord.FileUpload?.Category?.CategoryName;
+
+            list.Add(new PersonViewData
+            {
+                Id = accepted.Id,
+                FirstName = accepted.FirstName,
+                LastName = accepted.LastName,
+                Email = accepted.Email,
+                PhoneNumber = accepted.PhoneNumber,
+                Address = accepted.Address,
+                City = accepted.City,
+                State = accepted.State,
+                ZipCode = accepted.ZipCode,
+                Country = accepted.Country,
+                IsDeleted = accepted.IsDeleted,
+                FileName =category+ " "+filename
+            });
+
+
+
+            var data = personList.Where(s => s.PersonId != id).Select(p => new PersonViewData
             {
                 Id = p.Person.Id,
                 FirstName = p.Person.FirstName,
@@ -282,59 +328,66 @@ namespace ListingTracker.Controllers
     ).FirstOrDefault()
             }).ToList();
 
-            if ( data.Count()==1) {
-                data.Add(new PersonViewData{
-                Id = Guid.Empty,
-                PersonId = Guid.Empty,
-                FirstName = "",
-                LastName = "",
-                Email = "",
-                PhoneNumber = "",
-                Address = "",
-                City = "",
-                State = "",
-                ZipCode = "",
-                Country = "",
-                IsDeleted = false,
-                FileName = "",
-            });
-            }
-            else if( data.Count()==0 )
+            if( data .Count()>0)
             {
-                data.Add(new PersonViewData
-                {
-                    Id = Guid.Empty,
-                    PersonId = Guid.Empty,
-                    FirstName = "",
-                    LastName = "",
-                    Email = "",
-                    PhoneNumber = "",
-                    Address = "",
-                    City = "",
-                    State = "",
-                    ZipCode = "",
-                    Country = "",
-                    IsDeleted = false,
-                    FileName = "",
-                });
-                
-                data.Add(new PersonViewData
-                {
-                    Id = Guid.Empty,
-                    PersonId = Guid.Empty,
-                    FirstName = "",
-                    LastName = "",
-                    Email = "",
-                    PhoneNumber = "",
-                    Address = "",
-                    City = "",
-                    State = "",
-                    ZipCode = "",
-                    Country = "",
-                    IsDeleted = false,
-                    FileName = "",
-                });
+                list.AddRange(data);
             }
+
+            //if (data.Count() == 1)
+            //{
+            //    data.Add(new PersonViewData
+            //    {
+            //        Id = Guid.Empty,
+            //        PersonId = Guid.Empty,
+            //        FirstName = "",
+            //        LastName = "",
+            //        Email = "",
+            //        PhoneNumber = "",
+            //        Address = "",
+            //        City = "",
+            //        State = "",
+            //        ZipCode = "",
+            //        Country = "",
+            //        IsDeleted = false,
+            //        FileName = "",
+            //    });
+            //}
+            //else if (data.Count() == 0)
+            //{
+            //    data.Add(new PersonViewData
+            //    {
+            //        Id = Guid.Empty,
+            //        PersonId = Guid.Empty,
+            //        FirstName = "",
+            //        LastName = "",
+            //        Email = "",
+            //        PhoneNumber = "",
+            //        Address = "",
+            //        City = "",
+            //        State = "",
+            //        ZipCode = "",
+            //        Country = "",
+            //        IsDeleted = false,
+            //        FileName = "",
+            //    });
+
+            //    data.Add(new PersonViewData
+            //    {
+            //        Id = Guid.Empty,
+            //        PersonId = Guid.Empty,
+            //        FirstName = "",
+            //        LastName = "",
+            //        Email = "",
+            //        PhoneNumber = "",
+            //        Address = "",
+            //        City = "",
+            //        State = "",
+            //        ZipCode = "",
+            //        Country = "",
+            //        IsDeleted = false,
+            //        FileName = "",
+            //    });
+            //}
 
             return Ok(data);
         }
@@ -344,8 +397,8 @@ namespace ListingTracker.Controllers
         {
             var acceptedPerson = await _qDbContext.AcceptedPeople.FirstOrDefaultAsync(s => s.Id == id);
             return Ok(acceptedPerson);
-        }    
-        
+        }
+
         [HttpPost("/updateAcceptedPerson")]
         public async Task<IActionResult> UpdateAcceptedPerson([FromBody] UpdateDataModel updateData)
         {
@@ -375,11 +428,11 @@ namespace ListingTracker.Controllers
                     Data = model
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return NoContent();
             }
-            
+
         }
 
     }
