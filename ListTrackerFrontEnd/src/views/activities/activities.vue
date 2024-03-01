@@ -27,7 +27,8 @@ import ActivityItem, {
 } from "../../components/activity/activity-item.vue"
 import Topbar from "../../components/top-bar/top-bar.vue"
 import SearchInput from "../../components/input/search-input.vue"
-
+import { getLogUploaded } from "../../services/activityServices"
+import moment from 'moment';
 interface DataType {
   activities: ActivityType[]
   searchText: string
@@ -46,62 +47,31 @@ export default {
       activities: [
         {
           id: "1",
-          type: "Uploaded",
-          description: "file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
+          type: "",
+          description: "",
+          updatedAt: "",
         },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
-        {
-          id: "2",
-          type: "Uploaded",
-          description:
-            "Uploaded file 'Grade 6 student list .Xls' to Category '1'",
-          updatedAt: "Nov 10 2023 - 12:32:13 pm",
-        },
+        
       ],
       searchText: "",
     }
   },
+  created: function () {
+    this.getInitList();
+  },
+  methods: {
+    async getInitList(){
+      var res=await getLogUploaded();
+      var data=res.data;
+      this.activities=data.map((act:any)=>({
+           id: act.id,
+          type: act.logType,
+          description: act.logDescription,
+          updatedAt: moment(act.logDate).format('DD-MMM-YYYY'),
+
+      }));
+      console.log(res.data);
+    }
+  }
 }
 </script>

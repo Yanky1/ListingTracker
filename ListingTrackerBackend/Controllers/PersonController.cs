@@ -98,57 +98,126 @@ namespace ListingTracker.Controllers
             var acceptedPersonId = updateDataList.FirstOrDefault()?.AcceptedPersonId;
             var acceptedPerson = await _qDbContext.AcceptedPeople.FirstOrDefaultAsync(s => s.Id == acceptedPersonId);
 
+            var file= await _qDbContext.People.Include(s=>s.PersonWithFileUploads).ThenInclude(s=>s.FileUpload).Where(s=>s.Id==acceptedPerson.PersonId).FirstOrDefaultAsync();
+
+            var filename=file.PersonWithFileUploads.FirstOrDefault().FileUpload.FileName;
             foreach (var item in updateDataList)
             {
                 if (item.FieldName.ToLower() == "first_name")
                 {
                     acceptedPerson.FirstName = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct first name.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "last_name")
                 {
                     acceptedPerson.LastName = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct last name.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "email")
                 {
                     acceptedPerson.Email = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct email.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "address")
                 {
                     acceptedPerson.Address = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct address.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
+
                 }
                 else if (item.FieldName.ToLower() == "phonenumber")
                 {
                     acceptedPerson.PhoneNumber = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct phone no.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "city")
                 {
                     acceptedPerson.City = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct city.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "state")
                 {
                     acceptedPerson.State = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct state.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "zipcode")
                 {
                     acceptedPerson.ZipCode = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct zip code.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
                 else if (item.FieldName.ToLower() == "country")
                 {
                     acceptedPerson.Country = item.FieldValue;
+                    await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                    {
+                        LogBy = "User",
+                        LogDate = DateTime.Now,
+                        LogDescription = $"from '{filename}' was accepted as correct country.",
+                        LogDetails = acceptedPersonId.ToString(),
+                        LogType = item.FieldValue
+                    });
                 }
             }
             _qDbContext.AcceptedPeople.Update(acceptedPerson);
 
 
             await _qDbContext.AddRangeAsync(updateDataList);
-            await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
-            {
-                LogBy = "User",
-                LogDate = DateTime.Now,
-                LogDescription = $"Conflict Resolved for Accepted Person named ''{acceptedPerson.FirstName}' ' {acceptedPerson.LastName} ",
-                LogDetails = $"Conflict Resolved for Accepted Person named ''{acceptedPerson.FirstName}' ' {acceptedPerson.LastName} ",
-                LogType = "Conflict Resolved"
-            });
+           
             await _qDbContext.SaveChangesAsync();
 
 

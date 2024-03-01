@@ -8,14 +8,16 @@
             v-model="activeRecord"
             label="Sort record by"
             rounded
+            @change="handleSortChange"
           />
 
-          <Dropdown
+
+          <!-- <Dropdown
             :items="recordSortItems"
             label="Filter"
             icon="bars-filter"
             iconClass="min-w-5 min-h-5"
-          />
+          /> -->
 
           <div class="w-full max-w-[600px]">
             <SearchInput
@@ -41,7 +43,7 @@
 
       <Table
         :headCells="headCells"
-        :data="getData"
+        :data="filteredAndSortedData"
         :showExpandIcon="true"
         :showCheckbox="true"
         class="mt-[23px]"
@@ -253,6 +255,26 @@ export default {
     }
   },
   computed: {
+    filteredAndSortedData() {
+    let filteredData = this.tableData.filter(item => {
+      return (
+        item.first_name.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        item.last_name.toLowerCase().includes(this.searchText.toLowerCase())
+      );
+    });
+
+    if (this.activeRecord) {
+      filteredData = filteredData.sort((a:any, b) => {
+        if (this.activeRecord === 'name') {
+          return a.first_name.localeCompare(b.first_name);
+        } else if (this.activeRecord === 'date_modified') {
+        } else if (this.activeRecord === 'date_added') {
+        }
+      });
+    }
+
+    return filteredData;
+  },
     getData() {
       return this.tableData.map((row: any, index: number) => {
         return {
@@ -266,6 +288,9 @@ export default {
     this.getInitCategoryList();
   },
   methods: {
+    handleSortChange(value:any) {
+    this.activeRecord = value;
+  },
     async getInitCategoryList() {
       try {
         const response = await getPersonList();

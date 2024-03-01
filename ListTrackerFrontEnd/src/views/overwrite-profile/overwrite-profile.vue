@@ -113,11 +113,11 @@
       closeButton="Discard"
       confirmButton="Save changes"
     />
-    <!-- <ConfirmSuccessModal
+    <ConfirmSuccessModal
       :open="showSuccessModal"
       :message="successMessage"
       @close="closeSuccessModal"
-    /> -->
+    />
   </Layout>
 </template>
 
@@ -132,12 +132,15 @@ import Dropdown from "../../components/dropdown/dropdown.vue"
 import Select from "../../components/select/select.vue"
 import ConfirmModal from "../../components/modal/confirm-modal.vue"
 import { RecordTypeT } from "../../types/record"
+import ConfirmSuccessModal from "../../components/modal/confirmation-success-modal.vue"
 import { getAccecptedPerson,updateAccecptedPerson } from "../../services/overrrideServiece"
 
 interface DataType {
   showRevertModal: boolean
   showSaveConfirmModal: boolean
-  recordData:RecordTypeT
+  recordData:RecordTypeT,
+  showSuccessModal: boolean
+  successMessage: string,
 }
 
 export default {
@@ -151,6 +154,7 @@ export default {
     Dropdown,
     Select,
     ConfirmModal,
+    ConfirmSuccessModal,
   },
   data(): DataType {
     return {
@@ -168,7 +172,9 @@ export default {
         source:"",
       zipCode:"",
       id:""
-      }
+      },
+      showSuccessModal: false,
+      successMessage: "",
     }
   },
   created: function () {
@@ -176,6 +182,9 @@ export default {
 
   },
   methods: {
+    closeSuccessModal() {
+      this.showSuccessModal = false
+    },
    async getInitList(){
       const params = this.$route.params;
       const idS = params.record_id;
@@ -218,15 +227,16 @@ export default {
       zipCode:this.recordData.zipCode,
       id:this.recordData.id
      } 
-     
      );
      if(res.data.isSuccessful){
-      alert("Data Saved");
+     this.showSaveConfirmModal=false;
+      this.successMessage = `<span class="font-semibold">Information has been updated.`
+      this.showSuccessModal = true;
      }
      else{
+      this.showSaveConfirmModal=false;
       alert("Save Failed");
      }
-     this.showSaveConfirmModal=false;
       console.log("onSave")
     },
   },

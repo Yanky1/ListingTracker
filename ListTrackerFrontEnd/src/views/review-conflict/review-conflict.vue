@@ -80,6 +80,8 @@ import ConfirmSuccessModal from "../../components/modal/confirmation-success-mod
 import RecordCompareTable from "../../components/conflict-compare-table/conflict-compare-table.vue"
 import { v4 as uuidv4 } from "uuid"
 import { getPersonById,updateConflict ,deleteperson} from "../../services/dashboardService"
+import { getLogConflict } from "../../services/activityServices"
+import moment from "moment"
 
 interface DataType {
   records: RecordTypeT[]
@@ -233,7 +235,15 @@ export default {
             country: person.country,
             source:person.fileName
         }));
+      var res=await getLogConflict(id);
+      var data=res.data;
+      this.activities=data.map((act:any)=>({
+           id: act.id,
+          type: act.logType,
+          description: act.logDescription,
+          updatedAt: moment(act.logDate).format('DD-MMM-YYYY'),
 
+      }));
         console.log(this.records); // Check if you receive the correct data
     },
     handleBack() {
