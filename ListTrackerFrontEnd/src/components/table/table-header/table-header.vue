@@ -5,7 +5,7 @@
       class="py-5 px-2.5 w-10 text-white font-semibold text-sm"
       align="center"
     >
-      <Checkbox />
+      <Checkbox id="chkParent" />
     </th>
     <th
       v-if="showExpandIcon"

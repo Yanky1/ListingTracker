@@ -3,7 +3,7 @@
     <template :key="`${row.id}-${index}`" v-for="(row, index) of data">
       <TableRow>
         <TableCell v-if="showCheckbox && !isExpanded(row.id)">
-          <Checkbox :key="`${row.id}-checkbox-${index}`" :value="row.id" />
+          <Checkbox :id="`${row.id}-checkbox-${index}`" :value="row.id" />
         </TableCell>
         <TableCell v-if="showExpandIcon" :colspan="isExpanded(row.id) ? 2 : 1">
           <span @click="handleClick(row.id)" class="cursor-pointer"
@@ -46,7 +46,7 @@
         </TableCell>
       </TableRow>
 
-      <TableRow v-if="row.children" class="w-full">
+      <TableRow v-if="row.children.length>1" class="w-full">
         <TableCell
           :class="[!isExpanded(row.id) ? ' border-none' : '', 'px-0 py-0']"
           :colspan="colspan"
