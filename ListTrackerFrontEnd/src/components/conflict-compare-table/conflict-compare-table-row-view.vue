@@ -20,6 +20,7 @@
                 {{ row[headCell.field] }}
               </template>
             </template>
+
             <template v-else-if="headCell.field === 'address'">
               <span
                 class="flex gap-2 items-center cursor-pointer"
@@ -29,8 +30,7 @@
                 <label
                   :for="`${row.id}-${index}`"
                   class="cursor-pointer line-clamp-2"
-                  >{{ row[headCell.field] }}</label
-                >
+                  >{{ row[headCell.field] }}</label>
               </span>
             </template>
             <template v-else-if="typeof row[headCell.field] === 'string'">

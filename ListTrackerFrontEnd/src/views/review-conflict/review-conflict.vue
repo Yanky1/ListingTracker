@@ -78,7 +78,6 @@ import { ActivityType } from "../../components/activity/activity-item.vue"
 import ReplaceConfirmModal from "../../components/modal/confirm-modal.vue"
 import ConfirmSuccessModal from "../../components/modal/confirmation-success-modal.vue"
 import RecordCompareTable from "../../components/conflict-compare-table/conflict-compare-table.vue"
-import { v4 as uuidv4 } from "uuid"
 import { getPersonById,updateConflict ,deleteperson} from "../../services/dashboardService"
 import { getLogConflict } from "../../services/activityServices"
 import moment from "moment"
@@ -110,18 +109,11 @@ export default {
       sourceTracer:[],
       activities: [
         {
-          id: uuidv4(),
-          type: "Aminu s",
+          id: "",
+          type: "",
           description:
-            "from 'Grade 6 student list .Xls' was accepted as correct first name.",
-          updatedAt: "Feb 17 2024 - 12:32:13 pm",
-        },
-        {
-          id: uuidv4(),
-          type: "Aminu",
-          description:
-            "from 'Grade 6 student list .Xls' was accepted as correct first name.",
-          updatedAt: "Feb 17 2024 - 12:32:13 pm",
+            "",
+          updatedAt: "",
         },
       ],
       showReplaceConfirmModal: false,
@@ -141,19 +133,19 @@ export default {
         country: "",
         source:""
       },
-     {
-        id: "2",
-        first_name: "",
-        last_name: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "",
-        source:""
-      }
+    //  {
+    //     id: "2",
+    //     first_name: "",
+    //     last_name: "",
+    //     email: "",
+    //     phoneNumber: "",
+    //     address: "",
+    //     city: "",
+    //     state: "",
+    //     zipCode: "",
+    //     country: "",
+    //     source:""
+    //   }
       ],
     }
   },

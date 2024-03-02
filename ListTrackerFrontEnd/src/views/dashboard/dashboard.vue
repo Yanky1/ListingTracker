@@ -12,12 +12,12 @@
           />
 
 
-          <Dropdown
+          <!-- <Dropdown
             :items="recordSortItems"
             label="Filter"
             icon="bars-filter"
             iconClass="min-w-5 min-h-5"
-          />
+          /> -->
 
           <div class="w-full max-w-[600px]">
             <SearchInput
@@ -181,15 +181,11 @@ export default {
       recordSortItems: [
         {
           value: "name",
-          label: "Name",
+          label: "First Name",
         },
         {
-          value: "date_modified",
-          label: "Date modified",
-        },
-        {
-          value: "date_added",
-          label: "Date added",
+          value: "country",
+          label: "Country",
         },
       ],
       searchText: "",
@@ -256,20 +252,20 @@ export default {
   },
   computed: {
     filteredAndSortedData() {
-      let filteredData = this.tableData.filter(item => {
-      // Implement your search filtering logic here
-      const searchField = this.activeFilter === "first_name" ? "first_name" : "last_name";
+    let filteredData = this.tableData.filter(item => {
       return (
-        item[searchField].toLowerCase().includes(this.searchText.toLowerCase())
+        item.first_name.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        item.last_name.toLowerCase().includes(this.searchText.toLowerCase())
       );
     });
+
     if (this.activeRecord) {
       filteredData = filteredData.sort((a:any, b) => {
         if (this.activeRecord === 'name') {
           return a.first_name.localeCompare(b.first_name);
-        } else if (this.activeRecord === 'date_modified') {
-        } else if (this.activeRecord === 'date_added') {
-        }
+        } else if (this.activeRecord === 'country') {
+          return a.country.localeCompare(b.country);
+        } 
       });
     }
 
@@ -309,7 +305,7 @@ export default {
           state: person.acceptedPerson.state,
           zipCode: person.acceptedPerson.zipCode,
           country: person.acceptedPerson.country,
-          status:person.personList.length+' Conflict',
+          status:person.personList.length==1?'0 Conflict':person.personList.length+' Conflict',
           children: person.personList.map((child: any) => ({
             id: child.id,
             first_name: child.firstName,

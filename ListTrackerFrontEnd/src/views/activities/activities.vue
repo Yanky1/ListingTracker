@@ -12,7 +12,7 @@
     <div class="max-w-[365px] py-7 mx-auto">
       <ActivityItem
         :key="activity.id"
-        v-for="activity of activities"
+        v-for="activity of filteredActivities"
         :activity="activity"
       />
     </div>
@@ -29,6 +29,7 @@ import Topbar from "../../components/top-bar/top-bar.vue"
 import SearchInput from "../../components/input/search-input.vue"
 import { getLogUploaded } from "../../services/activityServices"
 import moment from 'moment';
+
 interface DataType {
   activities: ActivityType[]
   searchText: string
@@ -44,33 +45,40 @@ export default {
   },
   data(): DataType {
     return {
-      activities: [
-        {
-          id: "1",
-          type: "",
-          description: "",
-          updatedAt: "",
-        },
-        
-      ],
+      activities: [],
       searchText: "",
     }
   },
   created: function () {
     this.getInitList();
   },
+  computed: {
+    filteredActivities(): ActivityType[] {
+      if (!this.searchText.trim()) {
+        return this.activities;
+      } else {
+        const searchTerm = this.searchText.trim().toLowerCase();
+        return this.activities.filter(activity =>
+          activity.description.toLowerCase().includes(searchTerm) ||
+          activity.type.toLowerCase().includes(searchTerm)
+        );
+      }
+    }
+  },
   methods: {
     async getInitList(){
-      var res=await getLogUploaded();
-      var data=res.data;
-      this.activities=data.map((act:any)=>({
-           id: act.id,
+      try {
+        const response = await getLogUploaded();
+        const data = response.data;
+        this.activities = data.map((act: any) => ({
+          id: act.id,
           type: act.logType,
           description: act.logDescription,
           updatedAt: moment(act.logDate).format('DD-MMM-YYYY'),
-
-      }));
-      console.log(res.data);
+        }));
+      } catch (error) {
+        console.error("Error fetching activity data:", error);
+      }
     }
   }
 }

@@ -333,63 +333,7 @@ namespace ListingTracker.Controllers
                 list.AddRange(data);
             }
 
-            //if (data.Count() == 1)
-            //{
-            //    data.Add(new PersonViewData
-            //    {
-            //        Id = Guid.Empty,
-            //        PersonId = Guid.Empty,
-            //        FirstName = "",
-            //        LastName = "",
-            //        Email = "",
-            //        PhoneNumber = "",
-            //        Address = "",
-            //        City = "",
-            //        State = "",
-            //        ZipCode = "",
-            //        Country = "",
-            //        IsDeleted = false,
-            //        FileName = "",
-            //    });
-            //}
-            //else if (data.Count() == 0)
-            //{
-            //    data.Add(new PersonViewData
-            //    {
-            //        Id = Guid.Empty,
-            //        PersonId = Guid.Empty,
-            //        FirstName = "",
-            //        LastName = "",
-            //        Email = "",
-            //        PhoneNumber = "",
-            //        Address = "",
-            //        City = "",
-            //        State = "",
-            //        ZipCode = "",
-            //        Country = "",
-            //        IsDeleted = false,
-            //        FileName = "",
-            //    });
-
-            //    data.Add(new PersonViewData
-            //    {
-            //        Id = Guid.Empty,
-            //        PersonId = Guid.Empty,
-            //        FirstName = "",
-            //        LastName = "",
-            //        Email = "",
-            //        PhoneNumber = "",
-            //        Address = "",
-            //        City = "",
-            //        State = "",
-            //        ZipCode = "",
-            //        Country = "",
-            //        IsDeleted = false,
-            //        FileName = "",
-            //    });
-            //}
-
-            return Ok(data);
+            return Ok(list);
         }
 
         [HttpPost("/getAcceptedPerson")]

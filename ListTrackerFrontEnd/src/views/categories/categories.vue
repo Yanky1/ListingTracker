@@ -22,12 +22,12 @@
 
     <div class="container mx-auto py-[65px]">
       <div
-        v-if="categories.length"
+        v-if="filteredCategories.length"
         class="p-6 rounded-lg border w-fit mx-auto border-neutral-500 grid grid-cols-4 gap-x-11 gap-y-6 flex-wrap"
       >
         <CategoryCard
           :key="`category-${index}`"
-          v-for="(category, index) of categories"
+          v-for="(category, index) of filteredCategories"
           :name="category.categoryName"
           :id="category.id"
           :level="category.level"
@@ -60,8 +60,7 @@ import Icon from "../../components/icons/base-icon.vue"
 import CreateCategoryModal from "../../components/modal/create-category-modal.vue"
 import CategoryCard from "../../components/category/category-card.vue"
 import { CategoryType } from "../../types/category"
-import {getCategoryList,addCategory,updateCategory,deleteCategory} from "../../services/categoryServices"
-//import { v4 as uuidv4 } from "uuid"
+import { getCategoryList, addCategory, updateCategory, deleteCategory } from "../../services/categoryServices"
 
 interface DataType {
   searchText: string
@@ -90,20 +89,29 @@ export default {
     }
   },
   created: function () {
-        this.getInitCategoryList();
+    this.getInitCategoryList();
+  },
+  computed: {
+    filteredCategories(): CategoryType[] {
+      if (!this.searchText) {
+        return this.categories;
+      } else {
+        const searchTextLower = this.searchText.toLowerCase();
+        return this.categories.filter(category =>
+          category.categoryName.toLowerCase().includes(searchTextLower)
+        );
+      }
+    }
   },
   methods: {
-        async getInitCategoryList() {
+    async getInitCategoryList() {
       try {
         const response = await getCategoryList();
         const categoriesData = response.data.data;
-        // Assuming categoriesData is an array of objects from the response
-
-        // Update the categories array with the response data
         this.categories = categoriesData.map((category: any) => ({
-          id: category.id.toString(), // Ensure id is a string
+          id: category.id.toString(),
           categoryName: category.categoryName,
-          level:category.categoryLevel
+          level: category.categoryLevel
         }));
       } catch (error) {
         console.error("Error fetching category data:", error);
@@ -118,47 +126,45 @@ export default {
     },
     async handleCreate(category: any) {
       if (category?.id) {
-        var response=await updateCategory(category);
-        if(response.data.isSuccessful){
-        var categoryResult=response.data.data;
-        this.categories = this.categories.map((ca) => {
-          if (ca.id === category.id) {
-            return { ...ca, categoryName: category.name,level:category.level }
-          } else {
-            return ca
-          }
-        })}
-       
+        var response = await updateCategory(category);
+        if (response.data.isSuccessful) {
+          var categoryResult = response.data.data;
+          this.categories = this.categories.map((ca) => {
+            if (ca.id === category.id) {
+              return { ...ca, categoryName: category.name, level: category.level }
+            } else {
+              return ca
+            }
+          })
+        }
+
       } else {
-       var response=await addCategory(category);
-       if(response.data.isSuccessful)
-       {
-        var categoryResult=response.data.data;
-        this.categories.push({
-          id: categoryResult.id,
-          categoryName: categoryResult.categoryName,
-          level:categoryResult.categoryLevel
-        })
+        var response = await addCategory(category);
+        if (response.data.isSuccessful) {
+          var categoryResult = response.data.data;
+          this.categories.push({
+            id: categoryResult.id,
+            categoryName: categoryResult.categoryName,
+            level: categoryResult.categoryLevel
+          })
+        }
+
       }
-      
-    }
       this.showAddModal = false
     },
     async handleRemove(id: string) {
-      debugger;
-      var response=await deleteCategory(id);
-      if(response.data==undefined){
+      var response = await deleteCategory(id);
+      if (response.data == undefined) {
         alert(response.response.data);
       }
-      else if(response.data.isSuccessful){
+      else if (response.data.isSuccessful) {
         this.categories = this.categories.filter((category) => category.id !== id)
       }
     },
     handleEdit(id: string, index: number) {
-      debugger;
       this.showAddModal = true
       this.category = this.categories[index]
-      console.log("handleEdit", id)
+      console.log(id);
     },
     handleCardClick(id: string) {
       this.$router.push(`/categories/${id}/files`)

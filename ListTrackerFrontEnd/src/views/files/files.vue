@@ -29,7 +29,7 @@
     </Topbar>
 
     <div class="py-[30px] flex justify-center container mx-auto">
-      <FileEmpty v-if="!files.length" @click="openModal" />
+      <FileEmpty v-if="!filteredFiles.length" @click="openModal" />
       <template v-else>
         <Table
           :headCells="headCells"
@@ -60,7 +60,7 @@ import { v4 as uuidv4 } from "uuid"
 import { HeadCellType } from "../../components/table/table-header/table-header.vue"
 import Table, { TableActionType } from "../../components/table/table.vue"
 import dayjs from "dayjs"
-import {uploadFile,getFiles,deleteFile} from "../../services/fileServices"
+import { uploadFile, getFiles, deleteFile } from "../../services/fileServices"
 import { apiUrl } from "../../appConfig";
 interface DataType {
   headCells: HeadCellType[]
@@ -122,40 +122,49 @@ export default {
           type: "iconButton",
           icon: "trash",
           class: "text-red",
-          callback: (item:any) =>this.onRemove(item),
+          callback: (item: any) => this.onRemove(item),
         },
         {
           type: "button",
           label: "Import file",
           icon: "download",
           class: "w-full bg-purple-500 ring-1 ring-primary-1000",
-          callback: (item:any) => this.onImport(item),
+          callback: (item: any) => this.onImport(item),
         },
       ],
     }
   },
   created: function () {
-        this.getInitFileList();
+    this.getInitFileList();
+  },
+  computed: {
+    filteredFiles(): FileType[] {
+      if (!this.searchText.trim()) {
+        return this.files;
+      } else {
+        const searchTerm = this.searchText.trim().toLowerCase();
+        return this.files.filter(file =>
+          file.name.toLowerCase().includes(searchTerm) ||
+          file.format.toLowerCase().includes(searchTerm)
+        );
+      }
+    }
   },
   methods: {
-        async getInitFileList() {
+    async getInitFileList() {
       try {
         const params = this.$route.params;
         const categoryId = params.category_id;
         const response = await getFiles(categoryId[0]);
-        const filessData = response.data;
-        // Assuming categoriesData is an array of objects from the response
-
-        // Update the categories array with the response data
-        this.files = filessData.map((ft: any) => ({
-          id: ft.id.toString(), // Ensure id is a string
+        const filesData = response.data;
+        this.files = filesData.map((ft: any) => ({
+          id: ft.id.toString(),
           name: ft.fileDescription,
-          format:ft.fileExtension,
-          size:ft.fileSize
-
+          format: ft.fileExtension,
+          size: ft.fileSize
         }));
       } catch (error) {
-        console.error("Error fetching category data:", error);
+        console.error("Error fetching file data:", error);
       }
     },
     handleBack() {
@@ -167,29 +176,7 @@ export default {
     openModal() {
       this.showUploadModal = true
     },
-    fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-            if (reader.result && typeof reader.result === 'string') {
-                // Convert the ArrayBuffer to a Base64 string
-                const base64String = reader.result.split(',')[1];
-                resolve(base64String);
-            } else {
-                reject(new Error('File reading error: FileReader result is null or not a string'));
-            }
-        };
-
-        reader.onerror = (error) => {
-            reject(error);
-        };
-
-        // Read the file as a Data URL
-        reader.readAsDataURL(file);
-    });
-  },
-   async handleFileChange(file: File) {
+    async handleFileChange(file: File) {
       const filename = file.name
       const lastDotIndex = filename.lastIndexOf(".")
       const name = filename.substring(0, lastDotIndex)
@@ -197,37 +184,37 @@ export default {
       const params = this.$route.params;
       const categoryId = params.category_id;
       const base64String = await this.fileToBase64(file);
-      var fileData={
-      id: uuidv4(),
-      fileName: filename,
-      filePath: '',
-      fileExtension: format,
-      fileSize: `${(file.size / (1024 * 2)).toFixed(2)} MB`,
-      fileContentType: file.type,
-      fileDescription: name,
-      isDeleted: false,
-      dateUploaded: new Date(),
-      categoryId: +categoryId,
-      file: base64String,
-    };
+      var fileData = {
+        id: uuidv4(),
+        fileName: filename,
+        filePath: '',
+        fileExtension: format,
+        fileSize: `${(file.size / (1024 * 2)).toFixed(2)} MB`,
+        fileContentType: file.type,
+        fileDescription: name,
+        isDeleted: false,
+        dateUploaded: new Date(),
+        categoryId: +categoryId,
+        file: base64String,
+      };
       const response = await uploadFile(fileData);
-    if (response.isSuccessful){
-      this.files.push({
-        id: fileData.id,
-        name,
-        format,
-        size: fileData.fileSize,
-        created_at: `${fileData.dateUploaded.getTime()}`,
-        last_modified: file.lastModified,
-      })
-    }
-    else{
-      alert(response.message)
-    }
+      if (response.isSuccessful) {
+        this.files.push({
+          id: fileData.id,
+          name,
+          format,
+          size: fileData.fileSize,
+          created_at: `${fileData.dateUploaded.getTime()}`,
+          last_modified: file.lastModified,
+        })
+      }
+      else {
+        alert(response.message)
+      }
       this.closeModal()
     },
     getData() {
-      return this.files.map((row, index) => {
+      return this.filteredFiles.map((row, index) => {
         return {
           ...row,
           sn: index + 1,
@@ -236,36 +223,56 @@ export default {
         }
       })
     },
-    async onRemove(item:any) {
-      console.log(item);
-      var response=await deleteFile(item.id);
-      if(response.isSuccessful){
+    async onRemove(item: any) {
+      var response = await deleteFile(item.id);
+      if (response.isSuccessful) {
         this.files = this.files.filter((file) => file.id !== item.id)
       }
     },
     async onImport(item: any) {
       try {
-              const response = await fetch(apiUrl+`/downloadFile?id=${item.id}`, {
-                method: 'POST'
-              });
+        const response = await fetch(apiUrl + `/downloadFile?id=${item.id}`, {
+          method: 'POST'
+        });
 
-              if (!response.ok) {
-                throw new Error('Failed to download file');
-              }
+        if (!response.ok) {
+          throw new Error('Failed to download file');
+        }
 
-              const blob = await response.blob();
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = item.name; 
-              document.body.appendChild(a);
-              a.click();
-              window.URL.revokeObjectURL(url);
-            } catch (error) {
-              console.error('Error downloading file:', error);
-            }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = item.name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error downloading file:', error);
+      }
+    },
+    fileToBase64(file: File): Promise<string> {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          if (reader.result && typeof reader.result === 'string') {
+            // Convert the ArrayBuffer to a Base64 string
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+          } else {
+            reject(new Error('File reading error: FileReader result is null or not a string'));
+          }
+        };
+
+        reader.onerror = (error) => {
+          reject(error);
+        };
+
+        // Read the file as a Data URL
+        reader.readAsDataURL(file);
+      });
     }
-
-  },
+  }
 }
 </script>
