@@ -289,8 +289,7 @@ namespace ListingTracker.Controllers
 
             var filename = matchingRecord.FileUpload?.FileName;
             var category = matchingRecord.FileUpload?.Category?.CategoryName;
-
-            list.Add(new PersonViewData
+            var acPer = new PersonViewData
             {
                 Id = accepted.Id,
                 FirstName = accepted.FirstName,
@@ -303,8 +302,10 @@ namespace ListingTracker.Controllers
                 ZipCode = accepted.ZipCode,
                 Country = accepted.Country,
                 IsDeleted = accepted.IsDeleted,
-                FileName =category+ " "+filename
-            });
+                FileName = category + " " + filename
+            };
+
+            list.Add(acPer);
 
 
 
@@ -331,6 +332,8 @@ namespace ListingTracker.Controllers
             if( data .Count()>0)
             {
                 list.AddRange(data);
+
+                list.Remove(acPer);
             }
 
             return Ok(list);

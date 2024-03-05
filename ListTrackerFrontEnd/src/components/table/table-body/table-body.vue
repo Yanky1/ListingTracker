@@ -46,7 +46,7 @@
         </TableCell>
       </TableRow>
 
-      <TableRow v-if="row.children.length>1" class="w-full">
+      <TableRow v-if="row.children!=null&&row.children.length>1" class="w-full">
         <TableCell
           :class="[!isExpanded(row.id) ? ' border-none' : '', 'px-0 py-0']"
           :colspan="colspan"
