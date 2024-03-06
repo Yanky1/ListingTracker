@@ -36,6 +36,25 @@ export async function updateConflict(updateData:any): Promise<any> {
 }
 
 
+export async function updateConflictExisting(updateData:any): Promise<any> {
+  let config = {
+    method: "post",
+    url: apiUrl + "/updateConflictAsExisting",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    data: { updateData: JSON.stringify(updateData) }
+  };
+
+  return await axios
+    .request(config)
+    .then((response) => response)
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+
 export async function deleteperson(id:string): Promise<any> {
   let config = {
     method: "delete",

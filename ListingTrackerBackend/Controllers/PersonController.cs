@@ -47,8 +47,17 @@ namespace ListingTracker.Controllers
 
             foreach (var group in groupedPeople)
             {
+                var stl = await _qDbContext.SourceTrackings.Where(s => s.AcceptedPersonId == group.First().AcceptedPerson.Id).ToListAsync();
                 var viewModel = new PersonViewModel
                 {
+                    SourceTrackers = stl.Count()==0?new List<AcceptedSourceTrackingVM>():stl.Select(s=>new AcceptedSourceTrackingVM
+                    {
+                        AcceptedPersonId=s.AcceptedPersonId,
+                        FieldName = s.FieldName,
+                        FieldValue = s.FieldValue,
+                        Id= s.Id,
+                        PersonId = s.PersonId,
+                    }).ToList(),
                     AcceptedPerson = new AcceptedPersonViewModel
                     {
                         Id = group.First().AcceptedPerson.Id,
@@ -87,6 +96,8 @@ namespace ListingTracker.Controllers
 
                 viewData.Add(viewModel);
             }
+
+
 
             return Ok(viewData);
         }
@@ -241,6 +252,161 @@ namespace ListingTracker.Controllers
             }
 
         }
+
+        [HttpPost("/updateConflictAsExisting")]
+        public async Task<IActionResult> UpdateConflictExisting([FromBody] UpdateDataModel updateData)
+        {
+            try
+            {
+                var updateDataList = JsonConvert.DeserializeObject<List<AcceptedSourceTracking>>(updateData.UpdateData);
+                var acceptedPersonId = updateDataList.FirstOrDefault()?.AcceptedPersonId;
+                var acceptedPerson = await _qDbContext.AcceptedPeople.Include(s => s.AcceptedPersonWithMatchingRecords).FirstOrDefaultAsync(s => s.Id == acceptedPersonId);
+
+                var file = await _qDbContext.People.Include(s => s.PersonWithFileUploads).ThenInclude(s => s.FileUpload).Where(s => s.Id == acceptedPerson.PersonId).FirstOrDefaultAsync();
+
+                var filename = file.PersonWithFileUploads.FirstOrDefault().FileUpload.FileName;
+                foreach (var item in updateDataList)
+                {
+                    if (item.FieldName.ToLower() == "first_name")
+                    {
+                        acceptedPerson.FirstName = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct first name.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "last_name")
+                    {
+                        acceptedPerson.LastName = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct last name.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "email")
+                    {
+                        acceptedPerson.Email = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct email.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "address")
+                    {
+                        acceptedPerson.Address = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct address.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+
+                    }
+                    else if (item.FieldName.ToLower() == "phonenumber")
+                    {
+                        acceptedPerson.PhoneNumber = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct phone no.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "city")
+                    {
+                        acceptedPerson.City = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct city.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "state")
+                    {
+                        acceptedPerson.State = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct state.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "zipcode")
+                    {
+                        acceptedPerson.ZipCode = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct zip code.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                    else if (item.FieldName.ToLower() == "country")
+                    {
+                        acceptedPerson.Country = item.FieldValue;
+                        await _qDbContext.ActivityLogs.AddAsync(new ActivityLog
+                        {
+                            LogBy = "User",
+                            LogDate = DateTime.Now,
+                            LogDescription = $"from '{filename}' was accepted as correct country.",
+                            LogDetails = acceptedPersonId.ToString(),
+                            LogType = item.FieldValue
+                        });
+                    }
+                }
+                _qDbContext.AcceptedPeople.Update(acceptedPerson);
+
+                var records = await _qDbContext.AcceptedPersonWithMatchingRecord.Where(s => s.AcceptedPersonId == acceptedPersonId).ToListAsync();
+
+                var existingST = await _qDbContext.SourceTrackings.Where(s => s.AcceptedPersonId == acceptedPersonId).ToListAsync();
+
+                if (existingST.Any())
+                {
+                    _qDbContext.RemoveRange(existingST);
+                }
+
+                await _qDbContext.AddRangeAsync(updateDataList);
+
+
+                await _qDbContext.SaveChangesAsync();
+
+
+                // Access updateData.UpdateData here
+                return Ok(new
+                {
+                    IsSuccessful = true,
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
 
         [HttpDelete("/deletePerson")]
         public async Task<IActionResult> DeletePerson(Guid id)

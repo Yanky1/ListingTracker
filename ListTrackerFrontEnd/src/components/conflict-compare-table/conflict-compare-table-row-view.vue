@@ -87,7 +87,7 @@ import Icon from "../icons/base-icon.vue"
 import ReplaceConfirmModal from "../modal/confirm-modal.vue"
 import ConfirmSuccessModal from "../modal/confirmation-success-modal.vue"
 import TableActions from "../table/table-actions/table-actions.vue"
-import { updateConflict,deleteperson } from "../../services/dashboardService"
+import { updateConflict,deleteperson,updateConflictExisting } from "../../services/dashboardService"
 
 
 export default {
@@ -128,12 +128,24 @@ export default {
     openReplaceConfirmModal() {
       this.showReplaceConfirmModal = true
     },
-    closeReplaceConfirmModal() {
+    async closeReplaceConfirmModal() {
+      if(this.sourceTracer.length>0){
+        console.log("handle replacing");
+      const response = await updateConflictExisting(this.sourceTracer);
+      if(response.data.isSuccessful){
+      this.handleRevert();
       this.showReplaceConfirmModal = false
+      this.successMessage = `<span class="font-semibold">Information has been updated.`
+      this.showSuccessModal = true
+      }
+      }
+      else{
+        alert("Please select data before submitting");
+      }
     },
-    closeSuccessModal() {
-      window.location.reload();
-      this.showSuccessModal = false
+    async closeSuccessModal() {
+     this.showSuccessModal=false;
+     window.location.reload();
     },
     async onReplaceConfirm() {
       if(this.sourceTracer.length>0){
