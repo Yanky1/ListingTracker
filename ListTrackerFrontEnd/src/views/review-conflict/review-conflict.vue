@@ -78,7 +78,7 @@ import { ActivityType } from "../../components/activity/activity-item.vue"
 import ReplaceConfirmModal from "../../components/modal/confirm-modal.vue"
 import ConfirmSuccessModal from "../../components/modal/confirmation-success-modal.vue"
 import RecordCompareTable from "../../components/conflict-compare-table/conflict-compare-table.vue"
-import { getPersonById,updateConflict ,deleteperson} from "../../services/dashboardService"
+import { getPersonById,updateConflict ,deleteperson,updateConflictExisting} from "../../services/dashboardService"
 import { getLogConflict } from "../../services/activityServices"
 import moment from "moment"
 
@@ -245,12 +245,27 @@ export default {
       
       this.showReplaceConfirmModal = true
     },
-    closeReplaceConfirmModal() {
+    async closeReplaceConfirmModal() {
       
       this.showReplaceConfirmModal = false
+
+      if(this.sourceTracer.length>0){
+        console.log("handle replacing");
+      const response = await updateConflictExisting(this.sourceTracer);
+      if(response.data.isSuccessful){
+      this.revertChange();
+      this.showReplaceConfirmModal = false
+      this.successMessage = `<span class="font-semibold">Information has been updated.`
+      this.showSuccessModal = true
+      }
+      }
+      else{
+        alert("Please select data before submitting");
+      }
     },
     closeSuccessModal() {
-      this.showSuccessModal = false
+      this.showSuccessModal=false;
+     window.location.reload();
     },
     async onReplaceConfirm() {
       if(this.sourceTracer.length>0){
