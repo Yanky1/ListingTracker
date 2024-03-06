@@ -24,7 +24,7 @@ namespace ListingTracker.Controllers
         [HttpPost("/uploadFile")]
         public async Task<IActionResult> UploadPersonData(FileUploadViewModel model)
         {
-            var checkFiles = await _context.FileUploads.FirstOrDefaultAsync(s => s.FileName == model.FileName && !s.IsDeleted);
+            var checkFiles = await _context.FileUploads.FirstOrDefaultAsync(s => s.FileName == model.FileName && !s.IsDeleted && model.CategoryId == s.CategoryId);
             if (checkFiles == null)
             {
                 byte[] fileBytes = Convert.FromBase64String(model.file);
